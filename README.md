@@ -82,15 +82,16 @@ Usage
 =====
 See http://www.mike-stirling.com/notes/fht8v-protocol/ for explanation of FHT protocol. 
 To use serial line, <code>sudo screen /dev/ttyAMA0  19200</code> or <code>sudo screen /dev/USB0  19200</code> is a choice.
-On Raspbery Pi, consult https://github.com/lurch/rpi-serial-console to see how to enable onboard serial console (no USB needed).
+On Raspbery Pi, consult https://github.com/lurch/rpi-serial-console to see how to enable Raspi onboard serial console (no USB needed).
+Remember to set newline as line terminator.
 
-1. If you want just test our stuff, let <i>grp</i> be 1 and continue to step 1.
-   If you have single room or you want to drive all valves in the house in global manner, let <i>grp</i> bellow be allways 1.<p>
-   [ Optional: If you have more rooms and you want to regulate them separatedly:
-	   1.1 issue <code>fht groups <i>groups_number</i></code> command and
-	   1.2 repeat the whole procedure with <i>grp</i>equal to 1, 2, 3, ... up the number of your rooms. ]
+1. If you want just test our stuff, let <i>grp</i> bellow be simply 1. Issue <code>fht groups 1</code> command and continue to the step 2.<p>
+   The same rule apply if you have single room or you want to drive all valves in the house in global manner.<p>
+   Optional: If you have more rooms and you want to regulate them separatedly:<p>
+	   1.1 issue <code>fht groups <i>groups_number</i></code> command and<p>
+	   1.2 repeat the whole procedure with <i>grp</i> equal to 1, 2, 3, ... up the number of your rooms.
 
-2. From serial console (19200) - REMEMBER TO SET NEWLINE as line terminator, send command
+2. From serial console (19200 baud), send command
 <code>fht hc <i>grp</i> <i>hc1</i> <i>hc2</i></code>
 where <i>hc1</i> and <i>hc2</i> are appropriate (decimal) house codes - e.g. 10 11.
 This command saves your valve fht home code to be used in further communication with valves to ATMEGA EEPROM.
@@ -112,6 +113,5 @@ wait upto 2 minutes for time slot to come around until you hear a beep from the 
 <code>fht set <i>grp</i> <i>value</i></code>
 and wait up to 2 minutes.
 
-8. Re-sync if for any reason ATMEGA resets, need to resync valve. Send
-<code>fht sync</code>
-after each ATMEGA restart to sync all groups.
+8. After each ATMEGA restart, all groups are synced automatically. 
+If our valves get out of sync, use <code>fht sync</code> command to resync whole system.
