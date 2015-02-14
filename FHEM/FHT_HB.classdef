@@ -1,0 +1,68 @@
+### current group index (all FHT commands will use it)
+params group_idx 
+
+
+### choose one of the temp readings as the main here
+state temp_DS18x20
+# TODO: allow to configure what is the main thermometer
+
+#reading temp match "\d+\n"
+#reading temp match "(\\+|-)?\d+(\.\d{1,2})?\n"
+#reading temp postproc { s/^(\d+).*$/$1/;; $_ }
+
+### ATmega328 readings
+
+reading temp_m328 match "^(MSG TMP .*dev_type='m328'.*)$"
+reading temp_m328 postproc { s/^(MSG TMP value=')([\+,\-]?\d+\.?\d*).*$/$2/;; $_ }
+
+reading Vcc match "^(MSG VCC .*dev_type='m328'.*)$"
+reading Vcc postproc { s/^(MSG VCC value=')([\+,\-]?\d+\.?\d*).*$/$2/;; $_ }
+
+### si443 radio readings
+reading temp_si443 match "^(MSG TMP .*dev_type='si443'.*)$"
+reading temp_si443 postproc { s/^(MSG TMP value=')([\+,\-]?\d+\.?\d*).*$/$2/;; $_ }
+
+### Dallas DS18x20 onewire teperature readings
+# TODO: multiple devices are not distinguished (dev_index and dev_address available)
+reading temp_DS18x20 match "^(MSG TMP .*dev_type='DS18x20'.*)$"
+reading temp_DS18x20 postproc { s/^(MSG TMP value=')([\+,\-]?\d+\.?\d*).*$/$2/;; $_ }
+
+
+### FHT commands
+
+# enforce reading of temperature (and Vcc)
+get tmp cmd {"tmp\n"}
+
+#get temp expect "\d+\n"
+#get temp postproc { s/^(\d+)\n$/$1/;; $_ }
+
+
+# sync current group
+set fht_sync cmd {"fht sync %group_idx\n"}
+
+# pair current valve
+set fht_pair cmd {"fht pair %group_idx\n"}
+
+# set current group valve position (raw value 0..255)
+set fht_pos_raw cmd {"fht set %group_idx %pos\n"}
+set fht_pos_raw params pos
+
+# set current group valve position (percent value 0..100) { my $a = 1+1;; "Hello $a" } 
+set fht_pos_percent cmd {my $p = floor(%pos*255/100);; "fht set %group_idx $p\n"}
+set fht_pos_percent params pos
+
+# change number of groups under control (but current group index group_idx is not changed)
+set fht_groups cmd {"fht groups %groups\n"}
+set fht_groups params groups
+
+# change current group home code
+set fht_hc cmd {"fht hc %group_idx %hc1 %hc2\n"}
+set fht_hc params hc1 hc2
+
+# beep current group valves
+set fht_beep cmd {"fht beep %group_idx\n"}
+
+# print tech info
+get fht_info cmd {"fht info\n"}
+
+# netcat -l 9999

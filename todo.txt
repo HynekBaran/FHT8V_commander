@@ -1,0 +1,19 @@
+TODO:
+
+startup issues:
+1. fht sync
+2. when sync finished, fht set 0 30
+
+runtime issues:
+3. if no fht set issued within some timeout, set to 30 (and in FHEM enforce repetitive fht sets within the timeout)
+4. consider restart command
+
+5. consider (2-color?) LED blinking green when all OK and red when some problem appears (?)
+
+6. logging issuies:
+all prints must be of the form
+MSG x1=Ôvalue1Õ x2=Ôvalue2Õ - messages to be parsed by FHEM
+<CMD> <copy of params> - confirmation of what (fht/tmp) commands was issued
+LOG <verboselevel> message
+# auxiliary messages
+> - command prompt
