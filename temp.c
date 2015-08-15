@@ -94,6 +94,7 @@ void temp_request_print(void)
 
 void temp_print(void) 
 {
+  // TODO: Use m328 reading if Dallas not available?
   //DPRINTF("Temp request\n");
   temp_request_start();
   //DPRINTF("Temp delay\n");

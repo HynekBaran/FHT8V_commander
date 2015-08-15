@@ -213,7 +213,7 @@ static int fht_handler(cli_t *ctx, void *arg, int argc, char **argv)
 
 static int temp_handler(cli_t *ctx, void *arg, int argc, char **argv)
 {
-  temp_print();
+  temp_print(); // TODO: Use m328 reading if Dallas not available?
   return 0;
 }
 
@@ -243,9 +243,9 @@ int fhtsetup(void)
 			"(C) 2013 Mike Stirling\n"
 			"http://www.mikestirling.co.uk\n\n"
                         "(C) 2013 Hynek Baran\n"
-			"https://github.com/HynekBaran/FHT8V\n\n");
-
-	PRINTF("System clock = %lu Hz\n", F_CPU);
+			"https://github.com/HynekBaran/FHT8V\n\n"
+                        "Sketch date and time" __DATE__ " " __TIME__ "\n");
+        PRINTF("System clock = %lu Hz\n", F_CPU);
 	PRINTF("Reset status = 0x%X\n", mcustatus);
 
         m328_print_readings();
@@ -273,7 +273,7 @@ int fhtsetup(void)
 		//while (1);
 	} else {
 		LOG_FHT("0 RADIO OK\n\n");
-		si443x_dump(); 
+		//si443x_dump(); 
         }
 
         /* Init fht */
@@ -292,7 +292,8 @@ int fhtsetup(void)
           LOG_CLI("Syncing all group valves...\n");
           fht_sync(0);
           LOG_CLI("Sync done.\n");     
-          // set all valves default position, probably stored in EPROM to be configurable
+          LOG_CLI("Initial setting all groups valve positions to 1/3: message enqueued.\n"); // TODO: store initial state in EEPROM?
+	  fht_enqueue(0, 0, FHT_VALVE_SET, 255/3);
         }
 	return radioStatus;
 }

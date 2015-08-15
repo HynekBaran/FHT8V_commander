@@ -58,8 +58,9 @@ static int freeRam () {
   return (int) &v - (__brkval == 0 ? (int) &__heap_start : (int) __brkval); 
 }
 
-static void print_uptime(unsigned long secs)
+static void print_uptime(unsigned long seconds)
 {
+  unsigned long secs = seconds;
   unsigned long days=0;
   unsigned long hours=0;
   unsigned long mins=0;
@@ -70,7 +71,7 @@ static void print_uptime(unsigned long secs)
   mins=mins-(hours*60); //subtract the coverted minutes to hours in order to display 59 minutes max
   hours=hours-(days*24); //subtract the coverted hours to days in order to display 23 hours max
   //Display results
-  LOG_FHT("0 Uptime  %l days %u:%u:%u\n", days, hours, mins, secs);
+  LOG_FHT("0 Uptime  %lu days %lu:%lu:%lu\n", days, hours, mins, secs);
 }
 
 static void msgdump(fht_msg_t *msg)

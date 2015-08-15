@@ -38,19 +38,12 @@
  
 
 /* Dallas DS18x20 temperature chip pin */
-// In <OneWire.h> notation!
-#define ONE_WIRE_BUS 2 // Data wire is plugged into port 3 on the Arduino (ATmega328 chip port D3 pin 5)
-
-#define LED_TRX D5
-
-
-//#define TRX_SDN			C,5,1 // may be connected directly to the ground thus B0 is available for general use
-
+#define ONE_WIRE_BUS 3 // Data wire is plugged into port 3 on the Arduino (ATmega328 chip port D3 pin 5)
 
 /* Standard pin definitions */
 
 #define B0					B,0,1
-#define nTRX_IRQ			B,1,1 
+//#define TRX_SDN				B,1,1 // may be connected directly to the ground
 #define nTRX_SEL			B,2,1
 #define TRX_MOSI			B,3,1
 #define TRX_MISO			B,4,1
@@ -62,7 +55,7 @@
 
 #define DEBUG_RXD			D,0,1
 #define DEBUG_TXD			D,1,1
-// D2 is used for OneWire
+#define nTRX_IRQ			B,1,1 //D,2,1
 #define D3					D,3,1
 #define D5					D,5,1
 #define D6					D,6,1
@@ -72,52 +65,33 @@
  * Input definitions for each hardware port
  */
 
-#define PORTB_INS			(MASK(B0) | MASK(TRX_MISO) | MASK(nTRX_IRQ))
+#define PORTB_INS			(MASK(B0) | MASK(TRX_MISO))
 #define PORTC_INS			(0)
+#define PORTD_INS			(MASK(DEBUG_RXD) | MASK(nTRX_IRQ) | MASK(D3) | MASK(D5))
 
-#ifdef LED_TRX
-#define PORTD_INS			(MASK(DEBUG_RXD) | MASK(D3))
-#else
-#define PORTD_INS			(MASK(DEBUG_RXD) | MASK(D3) | MASK(D5))
-#endif
-
-#define PORTB_PULLUP		(MASK(TRX_MISO) | MASK(nTRX_IRQ))
+#define PORTB_PULLUP		(MASK(TRX_MISO))
 #define PORTC_PULLUP		(0)
-#define PORTD_PULLUP		(MASK(DEBUG_RXD) | MASK(D3))
+#define PORTD_PULLUP		(MASK(DEBUG_RXD) | MASK(nTRX_IRQ) | MASK(D3))
 
 /*
  * Output definitions for each hardware port
  */
-// Gate B
+
+#ifdef TRX_SDN
+#define PORTB_OUTS			(MASK(TRX_SDN) | MASK(nTRX_SEL) | MASK(TRX_MOSI) | MASK(TRX_SCK))
+#else
 #define PORTB_OUTS			(MASK(nTRX_SEL) | MASK(TRX_MOSI) | MASK(TRX_SCK))
-// Gate C
-#ifdef TRX_SDN
-#define PORTC_OUTS			(MASK(TRX_SDN)  | MASK(C3) | MASK(I2C_SDA) | MASK(I2C_SCL))
-#else
+#endif
 #define PORTC_OUTS			(MASK(C3) | MASK(I2C_SDA) | MASK(I2C_SCL))
-#endif
-// Gate D
-#ifdef LED_TRX
 #define PORTD_OUTS			(MASK(DEBUG_TXD) | MASK(D6) | MASK(D7)))
-#else
-#define PORTD_OUTS			(MASK(DEBUG_TXD) | MASK(LED_TRX) | MASK(D6) | MASK(D7))) //
-#endif
 
-// Gate B
-#define PORTB_INITIAL		(MASK(nTRX_SEL))
-// Gate C
 #ifdef TRX_SDN
-#define PORTC_INITIAL		(MASK(TRX_SDN) | MASK(C3) | MASK(I2C_SDA) | MASK(I2C_SCL))
+#define PORTB_INITIAL		(MASK(TRX_SDN) | MASK(nTRX_SEL))
 #else
+#define PORTB_INITIAL		(MASK(nTRX_SEL))
+#endif
 #define PORTC_INITIAL		(MASK(C3) | MASK(I2C_SDA) | MASK(I2C_SCL))
-#endif
-// Gate D
-#ifdef LED_TRX
-#define PORTD_INITIAL		(MASK(LED_TRX) | MASK(DEBUG_TXD) ) //
-#else
 #define PORTD_INITIAL		(MASK(DEBUG_TXD))
-#endif
-
 
 /*
  * Initial DDR values - unused pins are set to outputs to save power
@@ -169,15 +143,6 @@
 #else
 #define TRX_OFF()				{}
 #define TRX_ON()				{}
-#endif
-
-
-#ifdef LED_TRX
-#define LED_TRX_OFF()				CLEARP(LED_TRX)
-#define LED_TRX_ON()				SETP(LED_TRX)
-#else
-#define LED_TRX_OFF()				{}
-#define LED_TRX_ON()				{}
 #endif
 
 #endif /*BOARD_H_*/
