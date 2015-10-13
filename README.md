@@ -81,7 +81,7 @@ Pins marked (*) may be changed and configured in <code>boards.h</code>
 Usage
 =====
 See http://www.mike-stirling.com/notes/fht8v-protocol/ for explanation of FHT protocol. 
-To use serial line, <code>sudo screen /dev/ttyAMA0  19200</code> or <code>sudo screen /dev/USB0  19200</code> is a choice.
+To use serial line, <code>sudo screen /dev/ttyAMA0  9600</code> or <code>sudo screen /dev/USB0  9600</code> is a choice.
 On Raspbery Pi, consult https://github.com/lurch/rpi-serial-console to see how to enable Raspi onboard serial console (no USB needed).
 Remember to set newline as line terminator.
 
@@ -91,7 +91,7 @@ Remember to set newline as line terminator.
 	   1.1 issue <code>fht groups <i>groups_number</i></code> command and<p>
 	   1.2 repeat the whole procedure with <i>grp</i> equal to 1, 2, 3, ... up the number of your rooms.
 
-2. From serial console (19200 baud), send command
+2. From serial console (9600 baud), send command
 <code>fht hc <i>grp</i> <i>hc1</i> <i>hc2</i></code>
 where <i>hc1</i> and <i>hc2</i> are appropriate (decimal) house codes - e.g. 10 11.
 This command saves your valve fht home code to be used in further communication with valves to ATMEGA EEPROM.

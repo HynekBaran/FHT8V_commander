@@ -41,7 +41,7 @@
 #define DEBUG_PORT			0
 
 /// Desired baud rate
-#define DEBUG_BAUD			19200
+#define DEBUG_BAUD			9600
 
 /// Number of data bits (5,6,7 or 8)
 #define DEBUG_DATABITS		8
