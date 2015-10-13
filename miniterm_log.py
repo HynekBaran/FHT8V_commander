@@ -18,7 +18,7 @@ EXITCHARCTER = serial.to_bytes([0x1d])   # GS/CTRL+]
 MENUCHARACTER = serial.to_bytes([0x14])  # Menu: CTRL+T
 
 DEFAULT_PORT = "/dev/tty.SLAB_USBtoUART"
-DEFAULT_BAUDRATE = 9600
+DEFAULT_BAUDRATE = 52600
 DEFAULT_RTS = None
 DEFAULT_DTR = None
 
