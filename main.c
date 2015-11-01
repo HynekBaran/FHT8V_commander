@@ -179,7 +179,7 @@ static int fht_handler(cli_t *ctx, void *arg, int argc, char **argv)
                 }
                 fht_set_groups_num(groupname);
 		LOG_CLI("Number of active groups is set to %u.\n", groupname);
-                LOG_FHT("1 CLI Please setup home codes for new groups! Call: fht hc <group> <hc1> <hc2>\n");
+                LOG_FHT("2 CLI Please setup home codes for new groups! Call: fht hc <group> <hc1> <hc2>\n");
 	} else if (strcmp_PF(argv[1], PSTR("beep")) == 0) {
 		// *** BEEP ***
 		/* 'beep' will instruct the valve to make a beep */
@@ -260,19 +260,19 @@ int fhtsetup(void)
 	sei();
 
 	/* Turn on radio module */
-	LOG_FHT("1 RADIO Enabling radio...\n");
+	LOG_FHT("2 RADIO Enabling radio...\n");
 	TRX_ON();
 	_delay_ms(30);
         int radioStatus = si443x_init();
 	if (radioStatus < 0) { // TODO: set global variable with radio status		
                 #ifdef TRX_SDN
-                LOG_FHT("0 RADIO FAILED,  RFM chip TRX_SDN pin defined, connect it correctly (or ground it)!\n");
+                LOG_FHT("1 RADIO FAILED,  RFM chip TRX_SDN pin defined, connect it correctly (or ground it)!\n");
                 #else
-                LOG_FHT("0 RADIO FAILED\n");
+                LOG_FHT("1 RADIO FAILED\n");
                 #endif
 		//while (1);
 	} else {
-		LOG_FHT("0 RADIO OK\n\n");
+		LOG_FHT("1 RADIO OK\n\n");
 		//si443x_dump(); 
         }
 
@@ -290,10 +290,10 @@ int fhtsetup(void)
         /* initial sync if radio available and at least one group configured*/
         if (radioStatus >= 0 &&  fht_get_groups_num()>0) { 
           LOG_CLI("Syncing all group valves...\n");
-          fht_sync(0);
+          fht_sync(grp_indx_all);
           LOG_CLI("Sync done.\n");     
           LOG_CLI("Initial setting all groups valve positions to 1/3: message enqueued.\n"); // TODO: store initial state in EEPROM?
-	  fht_enqueue(0, 0, FHT_VALVE_SET, 255/3);
+	        fht_enqueue(grp_indx_all, 0, FHT_VALVE_SET, 255/3);
         }
 	return radioStatus;
 }

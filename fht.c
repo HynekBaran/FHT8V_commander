@@ -71,7 +71,50 @@ static void print_uptime(unsigned long seconds)
   mins=mins-(hours*60); //subtract the coverted minutes to hours in order to display 59 minutes max
   hours=hours-(days*24); //subtract the coverted hours to days in order to display 23 hours max
   //Display results
-  LOG_FHT("0 Uptime  %lu days %lu:%lu:%lu\n", days, hours, mins, secs);
+  LOG_FHT("1 Uptime  %lu days %lu:%lu:%lu\n", days, hours, mins, secs);
+}
+
+static void cmddump(fht_msg_t *msg)
+{
+  switch (msg->command & 0xf) {
+  case FHT_SYNC_SET:
+    printf_P(PSTR("SYNC_SET %hu"), msg->extension);
+    break;
+  case FHT_VALVE_OPEN:
+    printf_P(PSTR("VALVE_OPEN"));
+    break;
+  case FHT_VALVE_CLOSE:
+    printf_P(PSTR("VALVE_CLOSE"));
+    break;
+  case FHT_VALVE_SET:
+    printf_P(PSTR("VALVE_SET %hu"), msg->extension);
+    break;
+  case FHT_OFFSET:
+    printf_P(PSTR("OFFSET %hd"), msg->extension);
+    break;
+  case FHT_DESCALE:
+    printf_P(PSTR("DESCALE"));
+    break;
+  case FHT_SYNC:
+    printf_P(PSTR("SYNC %hu"), msg->extension);
+    break;
+  case FHT_TEST:
+    printf_P(PSTR("TEST"));
+    break;
+  default:
+    printf_P(PSTR("%hu %hu"), msg->command & 0xf, msg->extension);
+  }
+}
+
+
+static void cmdflagsdump(fht_msg_t *msg)
+{
+  if (msg->command & FHT_REPEAT)
+    printf_P(PSTR("REPEAT "));
+  if (msg->command & FHT_EXT_PRESENT)
+    printf_P(PSTR("EXTENDED "));
+  if (msg->command & FHT_BATT_WARN)
+    printf_P(PSTR("ENABLE_LOW_BATT_WARNING "));
 }
 
 static void msgdump(fht_msg_t *msg)
@@ -88,52 +131,20 @@ static void msgdump(fht_msg_t *msg)
 
   printf_P(PSTR("Received message:\n"));
   printf_P(PSTR("HC1 = %hu, HC2 = %hu, ADDR = %hu\n"), msg->hc1, msg->hc2, msg->address);
-
-  printf_P(PSTR("FLAGS: "));
-  if (msg->command & FHT_REPEAT)
-    printf_P(PSTR("REPEAT "));
-  if (msg->command & FHT_EXT_PRESENT)
-    printf_P(PSTR("EXTENDED "));
-  if (msg->command & FHT_BATT_WARN)
-    printf_P(PSTR("ENABLE_LOW_BATT_WARNING "));
   printf_P(PSTR("\n"));
 
   printf_P(PSTR("COMMAND: "));
-  switch (msg->command & 0xf) {
-  case FHT_SYNC_SET:
-    printf_P(PSTR("SYNC_SET %hu\n"), msg->extension);
-    break;
-  case FHT_VALVE_OPEN:
-    printf_P(PSTR("VALVE_OPEN\n"));
-    break;
-  case FHT_VALVE_CLOSE:
-    printf_P(PSTR("VALVE_CLOSE\n"));
-    break;
-  case FHT_VALVE_SET:
-    printf_P(PSTR("VALVE_SET %hu\n"), msg->extension);
-    break;
-  case FHT_OFFSET:
-    printf_P(PSTR("OFFSET %hd\n"), msg->extension);
-    break;
-  case FHT_DESCALE:
-    printf_P(PSTR("DESCALE\n"));
-    break;
-  case FHT_SYNC:
-    printf_P(PSTR("SYNC %hu\n"), msg->extension);
-    break;
-  case FHT_TEST:
-    printf_P(PSTR("TEST\n"));
-    break;
-  default:
-    printf_P(PSTR("%hu %hu\n"), msg->command & 0xf, msg->extension);
-  }
+  cmddump(&msg);
+
+  printf_P(PSTR(" FLAGS: "));
+  cmdflagsdump(&msg);
 
   if (msg->checksum == mychecksum) {
-    printf_P(PSTR("Checksum OK\n"));
+    printf_P(PSTR(" Checksum OK\n"));
   } 
   else {
-    printf_P(PSTR("Checksum bad\n"));
-  }
+    printf_P(PSTR(" Checksum bad\n"));
+  } 
 }
 
 static void hexdump(uint8_t *buf, int size)
@@ -310,7 +321,7 @@ static void fht_transmit(uint8_t group)
   }
 
   /* Dump un-encoded message */
-  hexdump(_msg, sizeof(fht_msg_t));
+  // hexdump(_msg, sizeof(fht_msg_t));
 
   /* Dump encoded message */
   length = fht_rfm_encode(_msg, outbuf, sizeof(fht_msg_t));
@@ -334,13 +345,13 @@ void fht_init(void)
   r = fht_eeprom_load(g_message);
   sei();
   if (r < 0) 
-   LOG_FHT("0 EEPROM ncosistent configuration data from EEPROM ignored\n")
+   LOG_FHT("1 EEPROM ncosistent configuration data from EEPROM ignored\n")
 else 
 { 
   PRINTF("Config loaded from eeprom, %d groups found.\n", r);
   g_groups_num = r;
   for (g = 0; g < r; g++)
-    LOG_FHT("0 EEPROM Group %d HC is %d %d.\n", grp_indx2name(g),  g_message[g].hc1, g_message[g].hc2);
+    LOG_FHT("1 EEPROM Group %d HC is %d %d.\n", grp_indx2name(g),  g_message[g].hc1, g_message[g].hc2);
 }
 }
 
@@ -356,6 +367,16 @@ void fht_set_groups_num(grp_name_t groupsnum)
   fht_eeprom_save_header(g_groups_num);
 }
 
+
+void msg_enq_print(grp_indx_t group)
+{
+  PRINTF("group='%d' hc='%u%u' addr='%u' commandLow='0x%hu' commandUp='0x%hu' extension='0x%hu' ",  
+        grp_indx2name(group),  g_message[group].hc1, g_message[group].hc2, g_message[group].address, 
+        g_message[group].command & 0xf, (g_message[group].command & 0xf0) >> 4, g_message[group].extension); 
+  PRINTF("COMMAND='"); cmddump(&(g_message[group]));      PRINTF("' ");
+  PRINTF("FLAGS='");   cmdflagsdump(&(g_message[group])); PRINTF("' ");  
+}
+
 /* current setting report */
 void fht_print(void) {
   int g;
@@ -367,10 +388,11 @@ void fht_print(void) {
   fht_eeprom_print();
 
   PRINTF("\n*** Messages enqueued:\n");
-  for (g = 0; g < g_groups_num; g++)
-    LOG_FHT("0 RFM_TXQ_OEUE MSG  group='%d'  hc='%u%u' addr='%u' commandLow='0x%hu' commandUp='0x%hu' extension='%u'\n", 
-    grp_indx2name(g),  g_message[g].hc1, g_message[g].hc2, g_message[g].address, 
-    g_message[g].command & 0xf, (g_message[g].command & 0xf0) >> 4, g_message[g].extension);  
+  for (g = 0; g < g_groups_num; g++) {
+    LOG_FHT("1 RFM_TQ MSG ");  
+    msg_enq_print(g);
+    PRINTF("\n");
+  }
 
   PRINTF("\n*** Technical report:\n");     
   PRINTF("Free mem is %u\n", freeRam());  
@@ -379,11 +401,11 @@ void fht_print(void) {
  // print_uptime(upt);
   m328_print_readings();
   if (si443x_status()==0) {
-    LOG_FHT("0 RADIO ok\n"); 
+    LOG_FHT("1 RADIO ok\n"); 
     si443x_dump();
   } 
   else {
-    LOG_FHT("0 RADIO FAILED status is %d.\n", si443x_status());     
+    LOG_FHT("1 RADIO FAILED status is %d.\n", si443x_status());     
   }
 
 }
@@ -420,7 +442,7 @@ void fht_tick_grp(grp_indx_t group)
     /* Sync message is sent once per second for 2 minutes */
     if (g_slot_count[group] & 1) {
       /* transmit sync */
-      LOG_FHT("0 RFM_TX SYNC %u group %d sync %d\n", g_ticks, grp_indx2name(group), g_slot_count[group]);
+      LOG_FHT("1 RFM_TX SYNC %u group %d sync %d\n", g_ticks, grp_indx2name(group), g_slot_count[group]);
       (g_message[group]).extension = g_slot_count[group];
       fht_transmit(group);
     }
@@ -435,7 +457,7 @@ void fht_tick_grp(grp_indx_t group)
     }
   } 
   else if (((g_message[group]).command & 0xf) == FHT_PAIR) {
-    LOG_FHT("0 RFM_TX PAIR group %d hc %d %d tick %u slot %d tx\n",  grp_indx2name(group), (g_message[group]).hc1,  (g_message[group]).hc2, g_ticks, slot);
+    LOG_FHT("1 RFM_TX PAIR group %d hc %d %d tick %u slot %d tx\n",  grp_indx2name(group), (g_message[group]).hc1,  (g_message[group]).hc2, g_ticks, slot);
     g_slot_count[group] = 0;
     fht_transmit(group);
     /* First actual message - will be sent when the correct timeslot is reached */
@@ -457,13 +479,16 @@ void fht_tick_grp(grp_indx_t group)
     } 
     else if (g_slot_count[group] == PERIOD_BASE + slot) {
       /* This is our timeslot - send the stored message */
-      LOG_FHT("0 RFM_TX CMD Transmitting cmd 0x%hu group %d hc %d %d tick %u timeslot %d tx\n",  
-      (g_message[group]).command & 0xf, grp_indx2name(group), (g_message[group]).hc1,  (g_message[group]).hc2, g_ticks, slot);
       
-      LOG_FHT("1 RFM_TX CMD Transmitting cmd for group='%d' hc='%u%u' addr='%u': commandLow='0x%hu' commandUp='0x%hu' extension='%u'\n",  
-      grp_indx2name(group),  g_message[group].hc1, g_message[group].hc2, g_message[group].address, g_message[group].command & 0xf, (g_message[group].command & 0xf0) >> 4, g_message[group].extension);      
-    
+     // log upcoming message
+      LOG_FHT("0 RFM_TX CMD ");
+      msg_enq_print(group);
+      PRINTF("  tick='%u' slot='%u'\n", g_ticks, slot);
+     
+      // reset timeslot counter
       g_slot_count[group] = 0;
+
+      // transmit message
       fht_transmit(group);
 
       /* Set the repeat flag for next time */
@@ -487,6 +512,9 @@ void fht_enqueue(grp_indx_t group, uint8_t address, uint8_t command, uint8_t val
     (g_message[group]).command = FHT_EXT_PRESENT | (command & 0xf);
     (g_message[group]).extension = value;
     sei();
+    LOG_FHT("0 RFM_TQ MSG ");  
+    msg_enq_print(group);
+    PRINTF("\n");
   }
 }
 
@@ -531,25 +559,25 @@ void fht_sync(grp_indx_t group)
 {
   /* Enqueue the sync message.  The interrupt handler will do the rest.  We can
    	 * monitor for the command change to see when it has completed */
-  if (group == grp_indx_all) {  // TODO: sync all in paralell
+  if (group == grp_indx_all) { 
     //  all groups
     grp_indx_t g;
     for (g=0; g<g_groups_num; g++)
       fht_sync_grp(g);
     /* Wait for repeat bit to be set - this indicates that the first real command
      		 * has been sent following the sync procedure */
-    LOG_FHT("0 RFM_TX SYNC Waiting for ALL groups sync...\n");
+    LOG_FHT("1 RFM_TX SYNC Waiting for ALL groups sync...\n");
     while (!fht_all_groups_synced());
-    LOG_FHT("0 RFM_TX SYNC Sync of all groups complete\n");
+    LOG_FHT("1 RFM_TX SYNC Sync of all groups complete\n");
   } 
   else {
     // single group 
     fht_sync_grp(group);
     /* Wait for repeat bit to be set - this indicates that the first real command
      		 * has been sent following the sync procedure */
-    LOG_FHT("0 RFM_TX SYNC Waiting for group %d sync...\n", grp_indx2name(group));
+    LOG_FHT("1 RFM_TX SYNC Waiting for group %d sync...\n", grp_indx2name(group));
     while (!fht_group_synced(group));
-    LOG_FHT("0 RFM_TX SYNC Sync group %d complete\n", grp_indx2name(group));
+    LOG_FHT("1 RFM_TX SYNC Sync group %d complete\n", grp_indx2name(group));
   }
 }
 

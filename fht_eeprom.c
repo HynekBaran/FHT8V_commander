@@ -140,7 +140,7 @@ void fht_eeprom_print(void) {
                     g_fht_eeprom_header.header_size); 
                     
   if ((header_cfg.version != 1 ) || (header_cfg.header_size != g_fht_eeprom_header.header_size)  ||  (header_cfg.group_size != g_fht_eeprom_header.group_size)) 
-    LOG_FHT("0 EEPROM Header mismatch!\n");
+    LOG_FHT("1 EEPROM Header mismatch!\n");
     
   
   
@@ -156,7 +156,7 @@ void fht_eeprom_print(void) {
                       (void*) header_cfg.header_size + g*header_cfg.group_size, 
                       header_cfg.group_size);
     
-    LOG_FHT("0 EEPROM Group='%u' hc='%u%u'\n", grp_indx2name(g), grp_cfg.hc1, grp_cfg.hc2);
+    LOG_FHT("1 EEPROM Group='%u' hc='%u%u'\n", grp_indx2name(g), grp_cfg.hc1, grp_cfg.hc2);
   }
   
   return header_cfg.groups;

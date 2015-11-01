@@ -374,19 +374,19 @@ int si443x_init(void)
 	/* Check for supported device */
 	device = SI443X_DEVICE_TYPE();
 	version = SI443X_DEVICE_VERSION();
-	LOG_FHT("0 RADIO Found device type %d version %d\n", device, version);
+	LOG_FHT("1 RADIO Found device type %d version %d\n", device, version);
 	if (device != SUPPORTED_DEVICE_TYPE || version != SUPPORTED_DEVICE_VERSION) {
-		LOG_FHT("0 RADIO ERROR: Unsupported/missing radio\n");
+		LOG_FHT("1 RADIO ERROR: Unsupported/missing radio\n");
 		radioStatus = -1;
 		return -1;
 	}
 
 	/* Software reset - poll for completion */
-	LOG_FHT("1 RADIO Resetting radio...\n");
+	LOG_FHT("2 RADIO Resetting radio...\n");
 	SI443X_SWRESET();
 	while (INP(nIRQ));
 	SI443X_STATUS(); /* Clear interrupt flag */
-	LOG_FHT("1 RADIO Done\n");
+	LOG_FHT("2 RADIO Done\n");
 
 	/* Go to standby */
 	si443x_standby();
