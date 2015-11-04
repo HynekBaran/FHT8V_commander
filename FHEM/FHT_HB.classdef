@@ -1,55 +1,50 @@
+#
+# FHT8V 
+# to be used with the device for driving FHT valves described on
+# https://github.com/HynekBaran/FHT8V
+# (atmega328 processor (or 3.3V Arduino) +  HopeRF RFM22B/RFM23B radio + Dallas DS18x20 thermometer)
+
 ### current group index (all FHT commands will use it)
 params group_idx 
-
-
-### choose one of the temp readings as the main here
-state temp_DS18x20
-# TODO: allow to configure what is the main thermometer
+#state pos
 
 #reading temp match "\d+\n"
 #reading temp match "(\\+|-)?\d+(\.\d{1,2})?\n"
 #reading temp postproc { s/^(\d+).*$/$1/;; $_ }
 
+
 ### ATmega328 readings
 
 reading temp_m328 match "^(MSG TMP .*dev_type='m328'.*)$"
-reading temp_m328 postproc { s/^(MSG TMP value=')([\+,\-]?\d+\.?\d*).*$/$2/;; $_ }
+reading temp_m328 postproc { s/^(MSG TMP LOCAL value=')([\+,\-]?\d+\.?\d*).*$/$2/;; $_ }
 
-reading Vcc match "^(MSG VCC .*dev_type='m328'.*)$"
-reading Vcc postproc { s/^(MSG VCC value=')([\+,\-]?\d+\.?\d*).*$/$2/;; $_ }
+reading Vcc match "^(MSG VCC LOCAL.*dev_type='m328'.*)$"
+reading Vcc postproc { s/^(.*value=')([\+,\-]?\d+\.?\d*).*$/$2/;; $_ }
+
+### Dallas DS18x20 onewire temperature readings
+# TODO: multiple devices are not distinguished (dev_index and dev_address available)
+reading temp_DS18x20 match "^(MSG TMP LOCAL.*dev_type='DS18x20'.*)$"
+reading temp_DS18x20 postproc { s/^(.*value=')([\+,\-]?\d+\.?\d*).*$/$2/;; $_ }
 
 ### si443 radio readings
-reading temp_si443 match "^(MSG TMP .*dev_type='si443'.*)$"
-reading temp_si443 postproc { s/^(MSG TMP value=')([\+,\-]?\d+\.?\d*).*$/$2/;; $_ }
-
-### Dallas DS18x20 onewire teperature readings
-# TODO: multiple devices are not distinguished (dev_index and dev_address available)
-reading temp_DS18x20 match "^(MSG TMP .*dev_type='DS18x20'.*)$"
-reading temp_DS18x20 postproc { s/^(MSG TMP value=')([\+,\-]?\d+\.?\d*).*$/$2/;; $_ }
+#reading temp_si443 match "^(MSG TMP LOCAL.*dev_type='si443'.*)$"
+#reading temp_si443 postproc { s/^(.*value=')([\+,\-]?\d+\.?\d*).*$/$2/;; $_ }
 
 
+
+# MSG TMP LOCAL value='19.8' unit='C' raw='c6' dev_type='DS18x20' dev_index='0' dev_address='289961550600006D'
+
+
+### 
 ### FHT commands
+###
+
+### read temperatures 
 
 # enforce reading of temperature (and Vcc)
 get tmp cmd {"tmp\n"}
 
-#get temp expect "\d+\n"
-#get temp postproc { s/^(\d+)\n$/$1/;; $_ }
-
-
-# sync current group
-set fht_sync cmd {"fht sync %group_idx\n"}
-
-# pair current valve
-set fht_pair cmd {"fht pair %group_idx\n"}
-
-# set current group valve position (raw value 0..255)
-set fht_pos_raw cmd {"fht set %group_idx %pos\n"}
-set fht_pos_raw params pos
-
-# set current group valve position (percent value 0..100) { my $a = 1+1;; "Hello $a" } 
-set fht_pos_percent cmd {my $p = floor(%pos*255/100);; "fht set %group_idx $p\n"}
-set fht_pos_percent params pos
+### FHT Driver device setup
 
 # change number of groups under control (but current group index group_idx is not changed)
 set fht_groups cmd {"fht groups %groups\n"}
@@ -64,5 +59,54 @@ set fht_beep cmd {"fht beep %group_idx\n"}
 
 # print tech info
 get fht_info cmd {"fht info\n"}
+#get fht_info postproc { s/^(CLI)(.*)/$2/;; $_ }
+
+
+### FHT commands
+
+# sync current group
+set fht_sync cmd {"fht sync %group_idx\n"}
+
+# pair current group valve(s)
+set fht_pair_all cmd {"fht pair %group_idx\n"}
+
+# pair current group  specific valve
+set fht_pair_single cmd {"fht pair %group_idx %valve\n"}
+set fht_pair_single params valve
+
+# set current group valve position (raw value 0..255)
+set fht_pos_raw cmd {"fht set %group_idx %pos\n"}
+set fht_pos_raw params pos
+
+# set current group valve position (percent value 0..100) { my $a = 1+1;; "Hello $a" } 
+set fht_pos_percent cmd {my $p = floor(%pos*255/100);; "fht set %group_idx $p\n"}
+set fht_pos_percent params pos
+
+# set current group valve offset (-50..50)
+set fht_offset cmd {"fht offset %group_idx %valve %pos\n"}
+set fht_offset params valve pos
+
+
+###
+### FHT readings
+###
+
+reading pos_enq match 	    "^LOG FHT \d RFM_TQ CMD='VALVE_SET (\d+)' .* grp='%group_idx'.*$"
+reading pos_enq postproc { s/^LOG FHT \d RFM_TQ CMD='VALVE_SET (\d+)' .* grp='%group_idx'.*$/$1/;; floor($_/255*100) }
+
+reading pos_tx  match 	    "^LOG FHT \d RFM_TX CMD='VALVE_SET (\d+)' .* grp='%group_idx'.*$"
+reading pos_tx  postproc { s/^LOG FHT \d RFM_TX CMD='VALVE_SET (\d+)' .* grp='%group_idx'.*$/$1/;; floor($_/255*100) }
+
+
+###
+### General readings
+###
+
+#reading last_LOG match "^(LOG .*)$"
+#reading last_CLI match "^(CLI .*)$"
+#reading last_MSG match "^(MSG .*)$"
+#reading last_unparsed match "^(.*)$"
+
+
 
 # netcat -l 9999

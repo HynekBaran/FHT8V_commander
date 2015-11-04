@@ -30,6 +30,8 @@
 #ifndef FHT_H_
 #define FHT_H_
 
+#define FHT_SYNC_SET_VALUE 255/3 // inital valve opening value
+
 #define FHT_REPEAT			(1 << 7)
 #define FHT_EXT_PRESENT		(1 << 5)
 #define FHT_BATT_WARN		(1 << 4)
@@ -74,6 +76,7 @@ void fht_init(void);
 grp_indx_t fht_get_groups_num(void);
 void fht_set_groups_num(grp_name_t groupsnum);
 void fht_print(void);
+void msg_enq_print(grp_indx_t group, int8_t verb);
 int16_t fht_print_temp(void);
 void fht_config_save_group(grp_indx_t group);
 void fht_tick(void);

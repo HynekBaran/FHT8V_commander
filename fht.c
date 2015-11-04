@@ -53,23 +53,23 @@ static volatile uint16_t g_ticks = 0;
 static volatile uint8_t g_nbits;
 
 static int freeRam () {
-  extern int __heap_start, *__brkval; 
-  int v; 
-  return (int) &v - (__brkval == 0 ? (int) &__heap_start : (int) __brkval); 
+  extern int __heap_start, *__brkval;
+  int v;
+  return (int) &v - (__brkval == 0 ? (int) &__heap_start : (int) __brkval);
 }
 
 static void print_uptime(unsigned long seconds)
 {
   unsigned long secs = seconds;
-  unsigned long days=0;
-  unsigned long hours=0;
-  unsigned long mins=0;
-  mins=secs/60; //convert seconds to minutes
-  hours=mins/60; //convert minutes to hours
-  days=hours/24; //convert hours to days
-  secs=secs-(mins*60); //subtract the coverted seconds to minutes in order to display 59 secs max 
-  mins=mins-(hours*60); //subtract the coverted minutes to hours in order to display 59 minutes max
-  hours=hours-(days*24); //subtract the coverted hours to days in order to display 23 hours max
+  unsigned long days = 0;
+  unsigned long hours = 0;
+  unsigned long mins = 0;
+  mins = secs / 60; //convert seconds to minutes
+  hours = mins / 60; //convert minutes to hours
+  days = hours / 24; //convert hours to days
+  secs = secs - (mins * 60); //subtract the coverted seconds to minutes in order to display 59 secs max
+  mins = mins - (hours * 60); //subtract the coverted minutes to hours in order to display 59 minutes max
+  hours = hours - (days * 24); //subtract the coverted hours to days in order to display 23 hours max
   //Display results
   LOG_FHT("1 Uptime  %lu days %lu:%lu:%lu\n", days, hours, mins, secs);
 }
@@ -77,32 +77,32 @@ static void print_uptime(unsigned long seconds)
 static void cmddump(fht_msg_t *msg)
 {
   switch (msg->command & 0xf) {
-  case FHT_SYNC_SET:
-    printf_P(PSTR("SYNC_SET %hu"), msg->extension);
-    break;
-  case FHT_VALVE_OPEN:
-    printf_P(PSTR("VALVE_OPEN"));
-    break;
-  case FHT_VALVE_CLOSE:
-    printf_P(PSTR("VALVE_CLOSE"));
-    break;
-  case FHT_VALVE_SET:
-    printf_P(PSTR("VALVE_SET %hu"), msg->extension);
-    break;
-  case FHT_OFFSET:
-    printf_P(PSTR("OFFSET %hd"), msg->extension);
-    break;
-  case FHT_DESCALE:
-    printf_P(PSTR("DESCALE"));
-    break;
-  case FHT_SYNC:
-    printf_P(PSTR("SYNC %hu"), msg->extension);
-    break;
-  case FHT_TEST:
-    printf_P(PSTR("TEST"));
-    break;
-  default:
-    printf_P(PSTR("%hu %hu"), msg->command & 0xf, msg->extension);
+    case FHT_SYNC_SET:
+      printf_P(PSTR("SYNC_SET %u"), msg->extension);
+      break;
+    case FHT_VALVE_OPEN:
+      printf_P(PSTR("VALVE_OPEN"));
+      break;
+    case FHT_VALVE_CLOSE:
+      printf_P(PSTR("VALVE_CLOSE"));
+      break;
+    case FHT_VALVE_SET:
+      printf_P(PSTR("VALVE_SET %u"), msg->extension);
+      break;
+    case FHT_OFFSET:
+      printf_P(PSTR("OFFSET %d"), msg->extension);
+      break;
+    case FHT_DESCALE:
+      printf_P(PSTR("DESCALE"));
+      break;
+    case FHT_SYNC:
+      printf_P(PSTR("SYNC %u"), msg->extension);
+      break;
+    case FHT_TEST:
+      printf_P(PSTR("TEST"));
+      break;
+    default:
+      printf_P(PSTR("cmd 0x%hu ext 0x%hu"), msg->command & 0xf, msg->extension);
   }
 }
 
@@ -110,9 +110,9 @@ static void cmddump(fht_msg_t *msg)
 static void cmdflagsdump(fht_msg_t *msg)
 {
   if (msg->command & FHT_REPEAT)
-    printf_P(PSTR("REPEAT "));
+    printf_P(PSTR("RPT "));
   if (msg->command & FHT_EXT_PRESENT)
-    printf_P(PSTR("EXTENDED "));
+    printf_P(PSTR("EXT "));
   if (msg->command & FHT_BATT_WARN)
     printf_P(PSTR("ENABLE_LOW_BATT_WARNING "));
 }
@@ -141,10 +141,10 @@ static void msgdump(fht_msg_t *msg)
 
   if (msg->checksum == mychecksum) {
     printf_P(PSTR(" Checksum OK\n"));
-  } 
+  }
   else {
     printf_P(PSTR(" Checksum bad\n"));
-  } 
+  }
 }
 
 static void hexdump(uint8_t *buf, int size)
@@ -178,7 +178,7 @@ static void pushbit(int bit, uint8_t **outptr)
     // 1 is 600us on/off - load 111000 to output
     size = 6;
     mask = 0x38;
-  } 
+  }
   else {
     // 0 is 400us on/off - load 1100 to output
     size = 4;
@@ -220,20 +220,20 @@ static int fht_rfm_encode(uint8_t *inbuf, uint8_t *outbuf, int insize)
 
   /* Fill FIFO bit-by-bit to simulate 400us/600us OOK protocol */
   for (n = 0; n < 12; n++)
-    pushbit(0,&outptr);
-  pushbit(1,&outptr);
+    pushbit(0, &outptr);
+  pushbit(1, &outptr);
   for (n = 0; n < 6; n++) {
     int parity = 0;
     byte = inbuf[n];
     for (nbits = 0; nbits < 8; nbits++) {
-      pushbit(byte & 0x80,&outptr);
+      pushbit(byte & 0x80, &outptr);
       parity ^= (byte / 0x80);
       byte <<= 1;
     }
-    pushbit(parity,&outptr);
+    pushbit(parity, &outptr);
   }
-  pushbit(0,&outptr);
-  pushbit(0,&outptr);
+  pushbit(0, &outptr);
+  pushbit(0, &outptr);
 
   return outptr - outbuf + 1;
 }
@@ -258,12 +258,12 @@ static int fht_rfm_decode(uint8_t *inbuf, uint8_t *outbuf, int outsize)
       /* zero bit */
       outbyte = outbyte << 1;
       inbits += 4;
-    } 
+    }
     else if ((symbol & 0xfc) == 0xe0) {
       /* one bit */
       outbyte = (outbyte << 1) | 1;
       inbits += 6;
-    } 
+    }
     else {
       /* invalid bit pattern */
       PRINTF("Invalid bit pattern - abort\n");
@@ -299,7 +299,7 @@ static int fht_rfm_decode(uint8_t *inbuf, uint8_t *outbuf, int outsize)
 
 static void fht_transmit(uint8_t group)
 {
-  uint8_t *_msg = (uint8_t*) &(g_message[group]);
+  uint8_t *_msg = (uint8_t*) & (g_message[group]);
   int n, length;
   /* Output buffer for variable length bitstream
    	 * The preamble is always 54 actual bits long (12 0's and a 1)
@@ -308,7 +308,7 @@ static void fht_transmit(uint8_t group)
    	 * Maximum buffer size therefore = 49 bytes + 4 for extra preamble
    	 */
   uint8_t outbuf[FHT_BUFFER_SIZE];
-  
+
   LED_TRX_ON();
 
   /* Clear output buffer */
@@ -333,8 +333,13 @@ static void fht_transmit(uint8_t group)
    	 * should be about 8 ms */
   _delay_ms(5);
   si443x_transmit(outbuf, length);
-  
-   LED_TRX_OFF();
+
+  LED_TRX_OFF();
+
+  // Log the trasmitted message
+  LOG_FHT("0 RFM_TX ");
+  msg_enq_print(group, 0);
+  PRINTF("\n");
 }
 
 /* Init fht and read the configuration */
@@ -344,15 +349,15 @@ void fht_init(void)
   cli();
   r = fht_eeprom_load(g_message);
   sei();
-  if (r < 0) 
-   LOG_FHT("1 EEPROM ncosistent configuration data from EEPROM ignored\n")
-else 
-{ 
-  PRINTF("Config loaded from eeprom, %d groups found.\n", r);
-  g_groups_num = r;
-  for (g = 0; g < r; g++)
-    LOG_FHT("1 EEPROM Group %d HC is %d %d.\n", grp_indx2name(g),  g_message[g].hc1, g_message[g].hc2);
-}
+  if (r < 0)
+    LOG_FHT("1 EEPROM incosistent configuration data from EEPROM ignored\n")
+    else
+    {
+      PRINTF("Config loaded from eeprom, %d groups found.\n", r);
+      g_groups_num = r;
+      for (g = 0; g < r; g++)
+        LOG_FHT("1 EEPROM Group %d HC is %d %d.\n", grp_indx2name(g),  g_message[g].hc1, g_message[g].hc2);
+    }
 }
 
 
@@ -368,13 +373,16 @@ void fht_set_groups_num(grp_name_t groupsnum)
 }
 
 
-void msg_enq_print(grp_indx_t group)
+void msg_enq_print(grp_indx_t group, int8_t verb)
 {
-  PRINTF("group='%d' hc='%u%u' addr='%u' commandLow='0x%hu' commandUp='0x%hu' extension='0x%hu' ",  
-        grp_indx2name(group),  g_message[group].hc1, g_message[group].hc2, g_message[group].address, 
-        g_message[group].command & 0xf, (g_message[group].command & 0xf0) >> 4, g_message[group].extension); 
-  PRINTF("COMMAND='"); cmddump(&(g_message[group]));      PRINTF("' ");
-  PRINTF("FLAGS='");   cmdflagsdump(&(g_message[group])); PRINTF("' ");  
+  PRINTF("CMD='"); cmddump(&(g_message[group]));      PRINTF("' ");
+  PRINTF("FLG='"); cmdflagsdump(&(g_message[group])); PRINTF("' ");
+  PRINTF("grp='%d' adr='%u' ", grp_indx2name(group),  g_message[group].address);
+  if (verb > 0) {
+    PRINTF(" hc='%u%u' cmdL='0x%hu' cmdU='0x%hu' ext='0x%hu' ",
+           g_message[group].hc1, g_message[group].hc2,
+           g_message[group].command & 0xf, (g_message[group].command & 0xf0) >> 4, g_message[group].extension);
+  }
 }
 
 /* current setting report */
@@ -383,29 +391,29 @@ void fht_print(void) {
 
   PRINTF("\n*** Current settings report:\n");
   PRINTF("Number of groups currently used: %u\n", g_groups_num);
-  PRINTF("Number of groups maximum:        %u\n", FHT_GROUPS_DIM);  
+  PRINTF("Number of groups maximum:        %u\n", FHT_GROUPS_DIM);
 
   fht_eeprom_print();
 
   PRINTF("\n*** Messages enqueued:\n");
   for (g = 0; g < g_groups_num; g++) {
-    LOG_FHT("1 RFM_TQ MSG ");  
-    msg_enq_print(g);
+    LOG_FHT("1 RFM_TQ ");
+    msg_enq_print(g, DEBUG);
     PRINTF("\n");
   }
 
-  PRINTF("\n*** Technical report:\n");     
-  PRINTF("Free mem is %u\n", freeRam());  
+  PRINTF("\n*** Technical report:\n");
+  PRINTF("Free mem is %u\n", freeRam());
   PRINTF("Uptime in ticks: %u\n", g_ticks);
- // unsigned log upt = millis()/1000;
- // print_uptime(upt);
+  // unsigned log upt = millis()/1000;
+  // print_uptime(upt);
   m328_print_readings();
-  if (si443x_status()==0) {
-    LOG_FHT("1 RADIO ok\n"); 
+  if (si443x_status() == 0) {
+    LOG_FHT("1 RADIO ok\n");
     si443x_dump();
-  } 
+  }
   else {
-    LOG_FHT("1 RADIO FAILED status is %d.\n", si443x_status());     
+    LOG_FHT("1 RADIO FAILED status is %d.\n", si443x_status());
   }
 
 }
@@ -413,7 +421,7 @@ void fht_print(void) {
 /* Save the configuration to EEPROM*/
 void fht_config_save_group(grp_indx_t group)
 {
-  cli();      
+  cli();
   fht_eeprom_save_group(group, &(g_message[group]));
   sei();
 }
@@ -421,16 +429,16 @@ void fht_config_save_group(grp_indx_t group)
 /* Called once every 500 ms from ISR */
 void fht_tick(void) // HB
 {
-  if (si443x_status()==0) {
+  if (si443x_status() == 0) {
     grp_indx_t group;
-    for (group = 0; group < g_groups_num; group++){
+    for (group = 0; group < g_groups_num; group++) {
       fht_tick_grp(group);
     }
     g_ticks++;
   } else {
     //PRINTF("fht_tick ignored,  radio not intialized.\n");
   }
-  
+
 }
 
 void fht_tick_grp(grp_indx_t group)
@@ -442,7 +450,7 @@ void fht_tick_grp(grp_indx_t group)
     /* Sync message is sent once per second for 2 minutes */
     if (g_slot_count[group] & 1) {
       /* transmit sync */
-      LOG_FHT("1 RFM_TX SYNC %u group %d sync %d\n", g_ticks, grp_indx2name(group), g_slot_count[group]);
+      //--//LOG_FHT("1 RFM_TX SYNC %u group %d sync %d\n", g_ticks, grp_indx2name(group), g_slot_count[group]);
       (g_message[group]).extension = g_slot_count[group];
       fht_transmit(group);
     }
@@ -453,38 +461,39 @@ void fht_tick_grp(grp_indx_t group)
 
       /* First actual message - will be sent when the correct timeslot is reached */
       (g_message[group]).command = FHT_EXT_PRESENT | FHT_SYNC_SET;
-      (g_message[group]).extension = 0;
+      (g_message[group]).extension = FHT_SYNC_SET_VALUE; // probably not working, my valves are set to 0 ignoring this parameter
     }
-  } 
+  }
   else if (((g_message[group]).command & 0xf) == FHT_PAIR) {
-    LOG_FHT("1 RFM_TX PAIR group %d hc %d %d tick %u slot %d tx\n",  grp_indx2name(group), (g_message[group]).hc1,  (g_message[group]).hc2, g_ticks, slot);
+    //--//LOG_FHT("1 RFM_TX PAIR group %d hc %d %d tick %u slot %d tx\n",  grp_indx2name(group), (g_message[group]).hc1,  (g_message[group]).hc2, g_ticks, slot);
     g_slot_count[group] = 0;
     fht_transmit(group);
     /* First actual message - will be sent when the correct timeslot is reached */
     (g_message[group]).command = FHT_EXT_PRESENT | FHT_SYNC_SET;
     (g_message[group]).extension = 0;
 
-  } 
+  }
   else {
     g_slot_count[group]++;
 
     if (g_slot_count[group] == PERIOD_BASE + slot - 4) {
-      DPRINTF("Four ticks before the group %u timeslot (tick=%u) free mem is %u,  requesting temperatures measurement.\n",  grp_indx2name(group), g_ticks, freeRam());                  
+      //DPRINTF("Four ticks before the group %u timeslot (tick=%u) free mem is %u,  requesting temperatures measurement.\n",  grp_indx2name(group), g_ticks, freeRam());
       temp_request_start();
-    } 
+    }
     else if (g_slot_count[group] == PERIOD_BASE + slot - 2) {
-      DPRINTF("Two  ticks before the group %u timeslot (tick=%u) free mem is %u, temperatures are:\n",  grp_indx2name(group), g_ticks, freeRam());
+      //DPRINTF("Two  ticks before the group %u timeslot (tick=%u) free mem is %u, temperatures are:\n",  grp_indx2name(group), g_ticks, freeRam());
       //PRINTF("Two ticks before the group %u timeslot temperatures (tick=%u) are:\n",  grp_indx2name(group), g_ticks);
       temp_request_print();
-    } 
+    }
     else if (g_slot_count[group] == PERIOD_BASE + slot) {
-      /* This is our timeslot - send the stored message */
+      /* This is our timeslot - SEND the stored MESSAGE */
+
+      // LOG_FHT("1 TIME tick='%u' slot='%u'\n", g_ticks, slot);
       
-     // log upcoming message
-      LOG_FHT("0 RFM_TX CMD ");
-      msg_enq_print(group);
-      PRINTF("  tick='%u' slot='%u'\n", g_ticks, slot);
-     
+      // FHEM FHT_HB.classdef code to catch and parse last transmitted state:
+      // reading pos_tx  match       "^LOG FHT \d RFM_TX CMD='VALVE_SET (\d+)' .* grp='%group_idx'.*$"
+      // reading pos_tx  postproc { s/^LOG FHT \d RFM_TX CMD='VALVE_SET (\d+)' .* grp='%group_idx'.*$/$1/;; floor($_/255*100) }
+
       // reset timeslot counter
       g_slot_count[group] = 0;
 
@@ -499,21 +508,21 @@ void fht_tick_grp(grp_indx_t group)
 
 void fht_enqueue(grp_indx_t group, uint8_t address, uint8_t command, uint8_t value)
 {
-  if (group == grp_indx_all) { 
+  if (group == grp_indx_all) {
     //  all groups
     grp_indx_t g;
-    for (g=0; g<g_groups_num; g++)
+    for (g = 0; g < g_groups_num; g++)
       fht_enqueue(g, address, command, value);
-  } 
+  }
   else {
-    // single group 
+    // single group
     cli();
     (g_message[group]).address = address;
     (g_message[group]).command = FHT_EXT_PRESENT | (command & 0xf);
     (g_message[group]).extension = value;
     sei();
-    LOG_FHT("0 RFM_TQ MSG ");  
-    msg_enq_print(group);
+    LOG_FHT("0 RFM_TQ ");
+    msg_enq_print(group, 0);
     PRINTF("\n");
   }
 }
@@ -550,28 +559,28 @@ int fht_group_synced(grp_indx_t group)
 int  fht_all_groups_synced(void)
 {
   grp_indx_t g;
-  for (g=0; g<g_groups_num; g++)
+  for (g = 0; g < g_groups_num; g++)
     if (!fht_group_synced(g)) return 0 ;
-  return 1;  
+  return 1;
 }
 
 void fht_sync(grp_indx_t group)
 {
   /* Enqueue the sync message.  The interrupt handler will do the rest.  We can
    	 * monitor for the command change to see when it has completed */
-  if (group == grp_indx_all) { 
+  if (group == grp_indx_all) {
     //  all groups
     grp_indx_t g;
-    for (g=0; g<g_groups_num; g++)
+    for (g = 0; g < g_groups_num; g++)
       fht_sync_grp(g);
     /* Wait for repeat bit to be set - this indicates that the first real command
      		 * has been sent following the sync procedure */
     LOG_FHT("1 RFM_TX SYNC Waiting for ALL groups sync...\n");
     while (!fht_all_groups_synced());
     LOG_FHT("1 RFM_TX SYNC Sync of all groups complete\n");
-  } 
+  }
   else {
-    // single group 
+    // single group
     fht_sync_grp(group);
     /* Wait for repeat bit to be set - this indicates that the first real command
      		 * has been sent following the sync procedure */
@@ -584,30 +593,30 @@ void fht_sync(grp_indx_t group)
 
 void fht_receive(void)
 {
-// disabled to save flash space
-//  fht_msg_t rxmsg;
-//  uint8_t buf[FHT_BUFFER_SIZE];
-//  int rssi;
-//
-//  /* Start receiver, no timeout.  Receive up to 46 bytes, which is
-//   	 * sufficient to capture the longest (all 1s) encoded packet
-//   	 * from the sync point onwards */
-//  si443x_receive(buf, FHT_BUFFER_SIZE, 0, &rssi);
-//
-//  DPRINTF("Rx rssi %d dBm\n", rssi);
-//
-//  /* Dump encoded message */
-//  hexdump(buf, FHT_BUFFER_SIZE);
-//
-//  if (fht_rfm_decode(buf, (uint8_t*)&rxmsg, sizeof(rxmsg)) < 0) {
-//    DPRINTF("Symbol error\n");
-//  }
-//
-//  /* Dump decoded message */
-//  hexdump((uint8_t*)&rxmsg, sizeof(rxmsg));
-//
-//  /* Decode contents */
-//  msgdump(&rxmsg);
+  // disabled to save flash space
+  //  fht_msg_t rxmsg;
+  //  uint8_t buf[FHT_BUFFER_SIZE];
+  //  int rssi;
+  //
+  //  /* Start receiver, no timeout.  Receive up to 46 bytes, which is
+  //   	 * sufficient to capture the longest (all 1s) encoded packet
+  //   	 * from the sync point onwards */
+  //  si443x_receive(buf, FHT_BUFFER_SIZE, 0, &rssi);
+  //
+  //  DPRINTF("Rx rssi %d dBm\n", rssi);
+  //
+  //  /* Dump encoded message */
+  //  hexdump(buf, FHT_BUFFER_SIZE);
+  //
+  //  if (fht_rfm_decode(buf, (uint8_t*)&rxmsg, sizeof(rxmsg)) < 0) {
+  //    DPRINTF("Symbol error\n");
+  //  }
+  //
+  //  /* Dump decoded message */
+  //  hexdump((uint8_t*)&rxmsg, sizeof(rxmsg));
+  //
+  //  /* Decode contents */
+  //  msgdump(&rxmsg);
 
 }
 
@@ -615,34 +624,34 @@ void fht_receive(void)
 
 void fht_test(void)
 {
-//  fht_msg_t msg;
-//  uint8_t *_msg = (uint8_t*)&msg, *ptr;
-//  uint8_t buf[FHT_BUFFER_SIZE];
-//  int n, length;
-//
-//  msg.hc1 = 12;
-//  msg.hc2 = 34;
-//  msg.address = 0;
-//  msg.command = FHT_EXT_PRESENT | FHT_VALVE_SET;
-//  msg.extension = 20;
-//  msg.checksum = 0x0c;
-//  for (n = 0; n < 5; n++) {
-//    msg.checksum += _msg[n];
-//  }
-//
-//  DPRINTF("Encoding...\n");
-//  hexdump((uint8_t*)&msg, sizeof(msg));
-//  length = fht_rfm_encode((uint8_t*)&msg, buf, sizeof(msg));
-//  hexdump(buf, length);
-//
-//  DPRINTF("Decoding...\n");
-//  memset(&msg, 0, sizeof(msg));
-//  ptr = &buf[8]; /* Skip preamble and 'sync' */
-//  length -= 8;
-//  hexdump(ptr, length);
-//  fht_rfm_decode(ptr, (uint8_t*)&msg, sizeof(msg));
-//  hexdump((uint8_t*)&msg, sizeof(msg));
-//  msgdump(&msg);
+  //  fht_msg_t msg;
+  //  uint8_t *_msg = (uint8_t*)&msg, *ptr;
+  //  uint8_t buf[FHT_BUFFER_SIZE];
+  //  int n, length;
+  //
+  //  msg.hc1 = 12;
+  //  msg.hc2 = 34;
+  //  msg.address = 0;
+  //  msg.command = FHT_EXT_PRESENT | FHT_VALVE_SET;
+  //  msg.extension = 20;
+  //  msg.checksum = 0x0c;
+  //  for (n = 0; n < 5; n++) {
+  //    msg.checksum += _msg[n];
+  //  }
+  //
+  //  DPRINTF("Encoding...\n");
+  //  hexdump((uint8_t*)&msg, sizeof(msg));
+  //  length = fht_rfm_encode((uint8_t*)&msg, buf, sizeof(msg));
+  //  hexdump(buf, length);
+  //
+  //  DPRINTF("Decoding...\n");
+  //  memset(&msg, 0, sizeof(msg));
+  //  ptr = &buf[8]; /* Skip preamble and 'sync' */
+  //  length -= 8;
+  //  hexdump(ptr, length);
+  //  fht_rfm_decode(ptr, (uint8_t*)&msg, sizeof(msg));
+  //  hexdump((uint8_t*)&msg, sizeof(msg));
+  //  msgdump(&msg);
 }
 
 
