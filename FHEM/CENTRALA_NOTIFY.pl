@@ -11,14 +11,14 @@ CENTRALA:.*_act:.*|CENTRALA_NOTIFY:.* {
 	my $acts_str 		  = AttrVal("CENTRALA", "actList", "");; # space separated list <CENTRALA_req_act_reading>,<actor_device>,<weight>[space]...
 	
 	### parse data and sum all actuations (required and current)
-	my @@acts = split(' ', $acts_str);; # space separated
-	my @@T;;
+	my @acts = split(' ', $acts_str);; # space separated
+	my @T;;
 	my $i=0;;
 	my $sum_req = 0;;  # required actuations (weighted sum)
 	my $sum_cur = 0;;  # current actuations (weighted sum)
-	for my $a (@@acts) {
+	for my $a (@acts) {
 	    # parse single actList atribute item (comma separated)
-		my @@s =  split(/,/, $a);; # comma separated
+		my @s =  split(/,/, $a);; # comma separated
 		my $req_name = $s[0];; # CENTRALA required actuation reading name
 		my $act_dev  = $s[1];; # actor device name
 		my $weight   = $s[2];; # actor weight
@@ -50,7 +50,7 @@ CENTRALA:.*_act:.*|CENTRALA_NOTIFY:.* {
 	#if ($boiler_req) { # independent relay (boilerDevice) 
 	if ($boiler_req or $valves_cur_opened) {  # FHT relay (boiler listening to valves radio messages) 
 		# ask for an update of valves actuations
-		for my $t (@@T) {
+		for my $t (@T) {
 			Log 1, "CENTRALA_NOTIFY: (VALVE) $t->{'req_name'}=$t->{'weight'}*$t->{'req_val'}, current=$t->{'weight'}*$t->{'cur_val'}, <set $t->{'act_dev'} $setActReading $t->{'req_val'}>";;
 			fhem ("set $t->{'act_dev'} $setActReading $t->{'req_val'}");;
 		}
