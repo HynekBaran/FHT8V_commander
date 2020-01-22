@@ -51,6 +51,8 @@ void dallas_temp_request_cpp(void)
   sei();
 }
 
+int16_t dallas_temp10_get_last_known_value = TEMP_NA;
+
 int16_t dallas_temp_print_cpp(void)
 { 
   uint8_t devcount;
@@ -84,9 +86,13 @@ int16_t dallas_temp_print_cpp(void)
     }
 
   }
+  dallas_temp10_get_last_known_value = result;
   return result; // the LAST device temperature
 }
 
+int16_t dallas_temp10_get_last_known_cpp(){
+  return dallas_temp10_get_last_known_value;
+  }
 
 extern "C" { 
 
@@ -102,6 +108,11 @@ extern "C" {
   {
     dallas_temp_request_cpp();
   }
+
+  int16_t dallas_temp10_get_last_known(void) {
+    return dallas_temp10_get_last_known_cpp();
+  }
+
 
 }
 

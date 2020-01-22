@@ -30,7 +30,27 @@
 #ifndef FHT_H_
 #define FHT_H_
 
-#define FHT_SYNC_SET_VALUE 255/3 // inital valve opening value
+/*
+ * Global setup 
+ */
+
+// inital valve opening value
+#define FHT_SYNC_SET_VALUE ((uint8_t) 255/2) 
+
+// PANIC state setup
+// (panic is a state when no FHT command is enqueued for a long time)
+#define FHT_PANIC_SET_VALUE ((uint8_t) (255/3)) // panic state valve opening value (int8)
+#define FHT_PANIC_TIMEOUT (2*60*15) // panic state timeout (in 0.5s ticks)
+
+// FREEZE state setup
+// (freeze state is used when local temp sensor is bellow the treshold to protect freezing)
+#define FHT_FREEZING_SET_VALUE ((uint8_t) (255)) // freezing state valves minimum opening value
+#define FHT_FREEZING_TEMP 12 // freezing temp treshold [Celsius]
+#define FREEZING_INIT_COUNT 5 // how many tx cycles  keep in freezing mode before leaving
+
+/*
+ * FHT HW command codes
+ */
 
 #define FHT_REPEAT			(1 << 7)
 #define FHT_EXT_PRESENT		(1 << 5)
@@ -79,6 +99,7 @@ void fht_print(void);
 void msg_enq_print(grp_indx_t group, int8_t verb);
 int16_t fht_print_temp(void);
 void fht_config_save_group(grp_indx_t group);
+void fht_do_not_panic(void);
 void fht_tick(void);
 void fht_tick_grp(grp_indx_t group);
 void fht_enqueue(grp_indx_t group, uint8_t address, uint8_t command, uint8_t value);

@@ -21,7 +21,7 @@ long m328_read_Temp() {
   while (bit_is_set(ADCSRA,ADSC));
   result = ADCL;
   result |= ADCH<<8;
-  result = (result - 125) * 1075;
+  result = (result - 125) * 1075 ; 
   return result;
 
 }

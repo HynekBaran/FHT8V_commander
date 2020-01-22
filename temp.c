@@ -80,11 +80,12 @@ void temp_request_wait(void)
 /*
   Print all measured values
 */
-void temp_request_print(void) 
+int16_t temp_request_print(void) 
 {
   m328_print_readings();	
   si443x_temp_print();
 	dallas_temp_print();
+  return temp_get_last_known_t10();
 }
 
 
@@ -104,6 +105,16 @@ void temp_print(void)
   return 0;
 }
 
+/*
+ * Return current temp
+ */
+int16_t temp_get_last_known_t10(void) {
+  int16_t T10dallas, T10m328;
+  T10dallas =  dallas_temp10_get_last_known();
+  T10m328 = (int16_t)(m328_read_Temp()/1000);
+  if (T10dallas != TEMP_NA) return (T10dallas<T10m328 ? T10dallas : T10m328); else return T10m328;
+  }
+ 
 /*
 
 For every temperature sensor interface, following functions must be defined:
