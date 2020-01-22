@@ -55,12 +55,6 @@ static volatile uint8_t g_nbits;
 
 static volatile uint8_t g_freezingMode = 0;
 
-static int freeRam () {
-  extern int __heap_start, *__brkval;
-  int v;
-  return (int) &v - (__brkval == 0 ? (int) &__heap_start : (int) __brkval);
-}
-
 static void print_uptime(unsigned long seconds)
 {
   unsigned long secs = seconds;
@@ -406,7 +400,7 @@ void fht_print(void) {
   }
 
   PRINTF("\n*** Technical report:\n");
-  PRINTF("Free mem is %u\n", freeRam());
+  // PRINTF("Free mem is %u\n", freeRam());
   PRINTF("Uptime in ticks: %u; last enq command at: %u\n", g_ticks, g_last_command_enqueued_time);
   PRINTF("Last known temp: %d/10, freezing mode: %u\n", temp_get_last_known_t10(), g_freezingMode);
   // unsigned log upt = millis()/1000;
@@ -694,6 +688,3 @@ void fht_test(void)
   //  hexdump((uint8_t*)&msg, sizeof(msg));
   //  msgdump(&msg);
 }
-
-
-

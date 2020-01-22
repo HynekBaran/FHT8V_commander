@@ -35,16 +35,16 @@
  */
 
 // inital valve opening value
-#define FHT_SYNC_SET_VALUE ((uint8_t) 255/2) 
+#define FHT_SYNC_SET_VALUE ((uint8_t) 96*255/100) 
 
 // PANIC state setup
 // (panic is a state when no FHT command is enqueued for a long time)
-#define FHT_PANIC_SET_VALUE ((uint8_t) (255/3)) // panic state valve opening value (int8)
+#define FHT_PANIC_SET_VALUE ((uint8_t) (97*255/100)) // panic state valve opening value (int8)
 #define FHT_PANIC_TIMEOUT (2*60*15) // panic state timeout (in 0.5s ticks)
 
 // FREEZE state setup
 // (freeze state is used when local temp sensor is bellow the treshold to protect freezing)
-#define FHT_FREEZING_SET_VALUE ((uint8_t) (255)) // freezing state valves minimum opening value
+#define FHT_FREEZING_SET_VALUE ((uint8_t) (98*255/100)) // freezing state valves minimum opening value
 #define FHT_FREEZING_TEMP 12 // freezing temp treshold [Celsius]
 #define FREEZING_INIT_COUNT 5 // how many tx cycles  keep in freezing mode before leaving
 
@@ -109,4 +109,3 @@ void fht_set_hc_msg(fht_msg_t *msg, uint8_t hc1, uint8_t hc2);
 void fht_receive(void);
 
 #endif /* FHT_H_ */
-

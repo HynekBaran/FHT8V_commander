@@ -41,6 +41,8 @@
 
 #include "temp.h"
 
+#include "memory.h"
+
 
 /*************************************************/
 
@@ -222,6 +224,12 @@ static int temp_handler(cli_t *ctx, void *arg, int argc, char **argv)
   return 0;
 }
 
+static int mem_handler(cli_t *ctx, void *arg, int argc, char **argv)
+{
+  PRINTF("Free mem is %u\n", freeRam()); 
+  return 0;
+}
+
 int fhtsetup(void)
 {
   uint8_t	mcustatus = MCUSR;
@@ -293,6 +301,10 @@ int fhtsetup(void)
   //cli_register_command(PSTR("fhtrx"), fhtrx_handler, NULL, PSTR("fhtrx - start receiver"));
   cli_register_command(PSTR("tmp"), temp_handler, NULL, PSTR("tmp - read the temperatures"));
 
+    
+  cli_register_command(PSTR("mem"), mem_handler, NULL, PSTR("mem - get free memory info"));
+
+
   /* initial sync if radio available and at least one group configured*/
   if (radioStatus >= 0 &&  fht_get_groups_num() > 0) {
     fht_do_not_panic();
@@ -321,4 +333,3 @@ int main(void)
 	fhtloop();
 }
 */
-
