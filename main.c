@@ -41,7 +41,7 @@
 
 #include "temp.h"
 
-#include "memory.h"
+#include "MemoryFree.h"
 
 
 /*************************************************/
@@ -226,7 +226,7 @@ static int temp_handler(cli_t *ctx, void *arg, int argc, char **argv)
 
 static int mem_handler(cli_t *ctx, void *arg, int argc, char **argv)
 {
-  PRINTF("Free mem is %u\n", freeRam()); 
+  PRINTF("Free mem is %u\n", freeMemory()); 
   return 0;
 }
 

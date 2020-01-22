@@ -400,7 +400,7 @@ void fht_print(void) {
   }
 
   PRINTF("\n*** Technical report:\n");
-  // PRINTF("Free mem is %u\n", freeRam());
+  PRINTF("Free mem is %u\n", freeMemory());
   PRINTF("Uptime in ticks: %u; last enq command at: %u\n", g_ticks, g_last_command_enqueued_time);
   PRINTF("Last known temp: %d/10, freezing mode: %u\n", temp_get_last_known_t10(), g_freezingMode);
   // unsigned log upt = millis()/1000;
@@ -493,13 +493,13 @@ void fht_tick_grp(grp_indx_t group)
     g_slot_count[group]++;
 
     if (g_slot_count[group] == PERIOD_BASE + slot - 4) {
-      //DPRINTF("Four ticks before the group %u timeslot (tick=%u) free mem is %u,  requesting temperatures measurement.\n",  grp_indx2name(group), g_ticks, freeRam());
+      //DPRINTF("Four ticks before the group %u timeslot (tick=%u) free mem is %u,  requesting temperatures measurement.\n",  grp_indx2name(group), g_ticks, freeMemory());
       if (group == 0) {
         temp_request_start();
       };
     }
     else if (g_slot_count[group] == PERIOD_BASE + slot - 2) {
-      //DPRINTF("Two  ticks before the group %u timeslot (tick=%u) free mem is %u, temperatures are:\n",  grp_indx2name(group), g_ticks, freeRam());
+      //DPRINTF("Two  ticks before the group %u timeslot (tick=%u) free mem is %u, temperatures are:\n",  grp_indx2name(group), g_ticks, freeMemory());
       //PRINTF("Two ticks before the group %u timeslot temperatures (tick=%u) are:\n",  grp_indx2name(group), g_ticks);
       ///// freezing protection
       // detection of freezing is done in group 0 ONLY
