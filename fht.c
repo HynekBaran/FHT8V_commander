@@ -430,6 +430,7 @@ void fht_config_save_group(grp_indx_t group)
 /* clear panic counter */
 void fht_do_not_panic(void) {
   g_last_command_enqueued_time = g_ticks;
+  LED_RED_OFF();
 }
 
 /* Called once every 500 ms from ISR */
@@ -440,13 +441,16 @@ void fht_tick(void) // HB
     LOG_CLI("PANIC setting all groups valve positions to 0x%X : message enqueued.\n", FHT_PANIC_SET_VALUE);
     fht_enqueue(grp_indx_all, 0, FHT_VALVE_SET, FHT_PANIC_SET_VALUE);
     fht_do_not_panic();
+    LED_RED_ON();
   }
 
   if (si443x_status() == 0) {
     grp_indx_t group;
+    LED_GREEN_ON();
     for (group = 0; group < g_groups_num; group++) {
       fht_tick_grp(group);
     }
+    LED_GREEN_OFF();
     g_ticks++;
   } else {
     LOG_CLI("fht_tick ignored,  radio not intialized.\n");

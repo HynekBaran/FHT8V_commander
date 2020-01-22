@@ -41,6 +41,8 @@ uint8_t dallas_temp_init_cpp(void)
   sensors.setResolution(12);
   devcount = sensors.getDeviceCount();
   PRINTF("Sensors set up, %u devices found.\n", devcount);
+  LED_GREEN_OFF(); 
+  for (uint8_t i=0; i<devcount; i++) {_delay_ms(200); LED_GREEN_ON(); _delay_ms(50); LED_GREEN_OFF();}
   return(devcount);
 }
 
@@ -115,4 +117,3 @@ extern "C" {
 
 
 }
-

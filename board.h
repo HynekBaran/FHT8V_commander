@@ -41,8 +41,9 @@
 // In <OneWire.h> notation!
 #define ONE_WIRE_BUS 2 // Data wire is plugged into port 3 on the Arduino (ATmega328 chip port D3 pin 5)
 
-#define LED_TRX D5
-
+#define LED_TRX 	D5
+#define LED_GREEN   D3 //HB
+#define LED_RED 	D6 //HB
 
 //#define TRX_SDN			C,5,1 // may be connected directly to the ground thus B0 is available for general use
 
@@ -76,14 +77,17 @@
 #define PORTC_INS			(0)
 
 #ifdef LED_TRX
-#define PORTD_INS			(MASK(DEBUG_RXD) | MASK(D3))
+//HB #define PORTD_INS			(MASK(DEBUG_RXD) | MASK(D3))
+#define PORTD_INS			(MASK(DEBUG_RXD)) //HB
 #else
-#define PORTD_INS			(MASK(DEBUG_RXD) | MASK(D3) | MASK(D5))
+//HB #define PORTD_INS			(MASK(DEBUG_RXD) | MASK(D3) | MASK(D5))
+#define PORTD_INS			(MASK(DEBUG_RXD)| MASK(D5)) //HB
 #endif
 
 #define PORTB_PULLUP		(MASK(TRX_MISO) | MASK(nTRX_IRQ))
 #define PORTC_PULLUP		(0)
-#define PORTD_PULLUP		(MASK(DEBUG_RXD) | MASK(D3))
+//HB #define PORTD_PULLUP		(MASK(DEBUG_RXD) | MASK(D3))
+#define PORTD_PULLUP		(MASK(DEBUG_RXD)) //HB
 
 /*
  * Output definitions for each hardware port
@@ -98,9 +102,12 @@
 #endif
 // Gate D
 #ifdef LED_TRX
-#define PORTD_OUTS			(MASK(DEBUG_TXD) | MASK(D6) | MASK(D7)))
+//HB #define PORTD_OUTS			(MASK(DEBUG_TXD) | MASK(D6) | MASK(D7)))
+#define PORTD_OUTS			(MASK(DEBUG_TXD) | MASK(D3) | MASK(D6) | MASK(D7))) //HB
 #else
-#define PORTD_OUTS			(MASK(DEBUG_TXD) | MASK(LED_TRX) | MASK(D6) | MASK(D7))) //
+//HB #define PORTD_OUTS			(MASK(DEBUG_TXD) | MASK(LED_TRX) | MASK(D6) | MASK(D7))) 
+#define PORTD_OUTS			(MASK(DEBUG_TXD) | MASK(LED_TRX) |  MASK(D3) | MASK(D6) | MASK(D7))) //HB 
+
 #endif
 
 // Gate B
@@ -179,5 +186,24 @@
 #define LED_TRX_OFF()				{}
 #define LED_TRX_ON()				{}
 #endif
+
+//HB:
+#ifdef LED_GREEN
+#define LED_GREEN_OFF()				CLEARP(LED_GREEN) 
+#define LED_GREEN_ON()				SETP(LED_GREEN)   
+#else
+#define LED_GREEN_OFF()				{} 
+#define LED_GREEN_ON()				{}   
+#endif
+
+#ifdef LED_RED
+#define LED_RED_OFF()				CLEARP(LED_RED) 
+#define LED_RED_ON()				SETP(LED_RED)   
+#else
+#define LED_RED_OFF()				{} 
+#define LED_RED_ON()				{}   
+#endif
+//:HB
+
 
 #endif /*BOARD_H_*/

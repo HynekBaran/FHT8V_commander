@@ -245,6 +245,10 @@ int fhtsetup(void)
   DDRD = DDRD_VAL;
 
   debug_init();
+
+  LED_GREEN_ON();
+  LED_RED_ON();
+  LED_TRX_ON();
   
 #ifdef DEBUG
   PRINTF("Debug level = %u\n", DEBUG);
@@ -287,6 +291,9 @@ int fhtsetup(void)
     //while (1);
   } else {
     LOG_FHT("1 RADIO OK\n\n");
+    LED_GREEN_OFF();
+    LED_TRX_OFF();
+    LED_RED_OFF();
     //si443x_dump();
   }
 
