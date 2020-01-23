@@ -547,6 +547,7 @@ void fht_tick_grp(grp_indx_t group)
 
 void fht_enqueue(grp_indx_t group, uint8_t address, uint8_t command, uint8_t value)
 {
+  LED_GREEN_ON();
   if (group == grp_indx_all) {
     //  all groups
     grp_indx_t g;
