@@ -401,9 +401,9 @@ void fht_print(void) {
 
   PRINTF("\n*** Technical report:\n");
   PRINTF("Free mem is %u\n", freeMemory());
-  if (fht_is_panic()) PRINTF("Panic!\n");
-  PRINTF("Uptime in ticks: %u; last enq command at: %u\n", g_ticks, g_last_command_enqueued_time);
-  if (g_freezingMode>0) PRINTF("Freezing!\n");
+  if (fht_is_panic()) PRINTF("Panic! ");
+  PRINTF("Uptime [ticks]: %u; last enq command at: %u\n", g_ticks, g_last_command_enqueued_time);
+  if (g_freezingMode>0) PRINTF("Freezing! ");
   PRINTF("Last known temp: %d/10, freezing mode: %u\n", temp_get_last_known_t10(), g_freezingMode);
   // unsigned log upt = millis()/1000;
   // print_uptime(upt);
@@ -411,13 +411,13 @@ void fht_print(void) {
   m328_print_readings();
   if (si443x_status() == 0) {
     LOG_FHT("1 RADIO ok\n");
-    si443x_dump();
+    // si443x_dump();
   }
   else {
     LOG_FHT("1 RADIO FAILED status is %d.\n", si443x_status());
   }
 
-  PRINTF("SETTINGS: FHT_FREEZING_TEMP=%d, FHT_FREEZING_SET_VALUE=0x%X, FREEZING_INIT_COUNT=%u; FHT_PANIC_TIMEOUT=%u, FHT_PANIC_SET_VALUE=0x%X\n",
+  PRINTF("SETTINGS: FHT_FREEZING_TEMP=%d, FHT_FREEZING_SET_VALUE=0x%X, FREEZING_INIT_COUNT=%u; FHT_PANIC_TIMEOUT=%u[ticks], FHT_PANIC_SET_VALUE=0x%X\n",
          FHT_FREEZING_TEMP, FHT_FREEZING_SET_VALUE, FREEZING_INIT_COUNT, FHT_PANIC_TIMEOUT, FHT_PANIC_SET_VALUE);
 }
 
