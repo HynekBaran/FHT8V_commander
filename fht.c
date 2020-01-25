@@ -114,13 +114,14 @@ static void cmdflagsdump(fht_msg_t *msg)
     printf_P(PSTR("ENABLE_LOW_BATT_WARNING "));
 }
 
+/*
 static void msgdump(fht_msg_t *msg)
 {
   int n;
   uint8_t *_msg = (uint8_t*)msg;
   uint8_t mychecksum;
 
-  /* Calculate expected checksum */
+  // Calculate expected checksum 
   mychecksum = 0x0c;
   for (n = 0; n < 5; n++) {
     mychecksum += _msg[n];
@@ -143,6 +144,7 @@ static void msgdump(fht_msg_t *msg)
     printf_P(PSTR(" Checksum bad\n"));
   }
 }
+*/
 
 static void hexdump(uint8_t *buf, int size)
 {
@@ -376,7 +378,8 @@ void msg_enq_print(grp_indx_t group, int8_t verb)
   PRINTF("FLG='"); cmdflagsdump(&(g_message[group])); PRINTF("' ");
   PRINTF("grp='%d' adr='%u' ", grp_indx2name(group),  g_message[group].address);
   if (verb > 0) {
-    PRINTF(" hc='%u%u' cmdL='0x%hu' cmdU='0x%hu' ext='0x%hu' ",
+    PRINTF(" hc='%u %u'='%hu %hu' cmdL='0x%hu' cmdU='0x%hu' ext='0x%hu' ",
+           g_message[group].hc1, g_message[group].hc2,
            g_message[group].hc1, g_message[group].hc2,
            g_message[group].command & 0xf, (g_message[group].command & 0xf0) >> 4, g_message[group].extension);
   }

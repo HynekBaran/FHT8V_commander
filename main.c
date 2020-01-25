@@ -1,26 +1,26 @@
 /*
- * FHT heating valve comms example with RFM22/23 for AVR
- *
- * Copyright (C) 2013 Mike Stirling
- *
- * The OpenTRV project licenses this file to you
- * under the Apache Licence, Version 2.0 (the "Licence");
- * you may not use this file except in compliance
- * with the Licence. You may obtain a copy of the Licence at
- *
- * http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the Licence is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied. See the Licence for the
- * specific language governing permissions and limitations
- * under the Licence.
- *
- * \file main.c
- * \brief Top-level
- *
- */
+   FHT heating valve comms example with RFM22/23 for AVR
+
+   Copyright (C) 2013 Mike Stirling
+
+   The OpenTRV project licenses this file to you
+   under the Apache Licence, Version 2.0 (the "Licence");
+   you may not use this file except in compliance
+   with the Licence. You may obtain a copy of the Licence at
+
+   http://www.apache.org/licenses/LICENSE-2.0
+
+   Unless required by applicable law or agreed to in writing,
+   software distributed under the Licence is distributed on an
+   "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+   KIND, either express or implied. See the Licence for the
+   specific language governing permissions and limitations
+   under the Licence.
+
+   \file main.c
+   \brief Top-level
+
+*/
 
 #include <avr/io.h>
 #include <avr/interrupt.h>
@@ -84,7 +84,7 @@ static int8_t TestIfGrpIsAll(grp_name_t g)
 
 
 /* Sync with a valve or set a command for transmission in the next
- * transmit window (which may be up to 2 minutes later) */
+   transmit window (which may be up to 2 minutes later) */
 static int fht_handler(cli_t *ctx, void *arg, int argc, char **argv)
 {
   uint8_t value;
@@ -92,11 +92,11 @@ static int fht_handler(cli_t *ctx, void *arg, int argc, char **argv)
   grp_indx_t group;
 
   /*
-   Every command has a form fht <cmd> <group> [<optional_params>]
-   where group is name of the group in quastion.
-   Group names are 1, 2, 3, ... but internally C array indices are 0, 1, 2,  ... so in g_message are indices shifted by 1.
-   Group name 0 is moreover reserved for "all groups" (not implemented yet).
-   */
+    Every command has a form fht <cmd> <group> [<optional_params>]
+    where group is name of the group in quastion.
+    Group names are 1, 2, 3, ... but internally C array indices are 0, 1, 2,  ... so in g_message are indices shifted by 1.
+    Group name 0 is moreover reserved for "all groups" (not implemented yet).
+  */
 
   if (argc < 2) {
     LOG_CLI("Missing parameter.\n");
@@ -116,22 +116,30 @@ static int fht_handler(cli_t *ctx, void *arg, int argc, char **argv)
 
   group = grp_name2indx(groupname);
 
-  if (strcmp_PF(argv[1], PSTR("hc")) == 0) {
-    // *** HC ***
+  if ((strcmp_PF(argv[1], PSTR("hc")) == 0) || (strcmp_PF(argv[1], PSTR("hcd")) == 0) ||  (strcmp_PF(argv[1], PSTR("hch")) == 0)) {
+    // *** HomeCode ***
+    // hc, hcd .. dec, hch .. hex
     uint8_t hc1, hc2;
 
     if (argc < 5) return 2;
     if (TestIfGrpIsAll(groupname)) return 1;
 
     /* 'hc' takes two arguments which are the two house codes for
-     * the valve with which we are pairing e.g.
-     * > fht hc 12 34
-     */
-    hc1 = atoi(argv[3]);
-    hc2 = atoi(argv[4]);
+       the valve with which we are pairing e.g.
+       > fht hc 12 34
+    */
+
+    if (strcmp_PF(argv[1], PSTR("hch")) == 0) { // hex
+      hc1 = strtol(argv[3], 0, 16);
+      hc2 = strtol(argv[4], 0, 16);
+    } else { // dec
+      hc1 = atoi(argv[3]);
+      hc2 = atoi(argv[4]);
+    }
+
     fht_set_hc_grp(group, hc1, hc2);
     fht_config_save_group(group);
-    LOG_CLI("Home code of group %u was set to %u %u.\n", groupname, hc1, hc2);
+    LOG_CLI("Home code of group %u was set to %u %uhc='%u %u'='%hu %hu'.\n", groupname, hc1, hc2, hc1, hc2);
 
   } else if (strcmp_PF(argv[1], PSTR("pair")) == 0) {
     // *** PAIR ***
@@ -150,12 +158,15 @@ static int fht_handler(cli_t *ctx, void *arg, int argc, char **argv)
     // *** SYNC ***
     LOG_CLI("Syncing group %u valves\n", groupname);
     fht_sync(group);
-  } else if (strcmp_PF(argv[1], PSTR("set")) == 0) {
-    // *** SET ***
+  } else if ((strcmp_PF(argv[1], PSTR("set")) == 0) || strcmp_PF(argv[1], PSTR("seth")) == 0  || strcmp_PF(argv[1], PSTR("setp")) == 0) {
     if (argc < 4) return 1;
-    /* 'set' takes one argument which is the valve position in the
-     * range 0 to 255 */
-    value = atoi(argv[3]);
+    // 'set' takes one argument which is the valve position in the range 0 to 255 [decimal]
+    // 'seth' takes one argument which is the valve position in the range 0 to FF [hex]
+    // 'setp' takes one argument which is the valve position in the range 0 to 100 [decimal, %]
+    if (strcmp_PF(argv[1], PSTR("set")) == 0) value = atoi(argv[3]); // dec
+    else  if (strcmp_PF(argv[1], PSTR("seth")) == 0)   value = strtol(argv[3], 0, 16); // hex
+    else  value = atoi(argv[3]); // dec %
+
     LOG_CLI("Setting group %u valve position to 0x%X\n", groupname, value);
     fht_enqueue(group, 0, FHT_VALVE_SET, value);
     fht_cancel_panic();
@@ -175,7 +186,7 @@ static int fht_handler(cli_t *ctx, void *arg, int argc, char **argv)
     /* set number of currently used groups
                    this command has no groupname parameter
                    so the number of groups is in groupname parameter
-                */
+    */
     if (groupname < 1 || groupname > FHT_GROUPS_DIM) {
       LOG_CLI("Error: %u is out of the range [1, FHT_GROUPS_DIM=%u].\n", groupname, FHT_GROUPS_DIM);
       return 1;
@@ -226,7 +237,7 @@ static int temp_handler(cli_t *ctx, void *arg, int argc, char **argv)
 
 static int mem_handler(cli_t *ctx, void *arg, int argc, char **argv)
 {
-  PRINTF("Free mem is %u\n", freeMemory()); 
+  PRINTF("Free mem is %u\n", freeMemory());
   return 0;
 }
 
@@ -249,7 +260,7 @@ int fhtsetup(void)
   LED_GREEN_ON();
   LED_RED_ON();
   LED_TRX_ON();
-  
+
 #ifdef DEBUG
   PRINTF("Debug level = %u\n", DEBUG);
 #else
@@ -269,7 +280,7 @@ int fhtsetup(void)
   m328_print_readings();
 
   /* Configure tick interrupt for half second from internal
-   * 8 MHz clock using timer 1 */
+     8 MHz clock using timer 1 */
   TCCR1A = 0; /* CTC mode */
   TCCR1B = _BV(WGM12) | _BV(CS12); /* divide by 256 */
   OCR1A = F_CPU / 256 / SYSTEM_TICK - 1;
@@ -308,21 +319,21 @@ int fhtsetup(void)
   //cli_register_command(PSTR("fhtrx"), fhtrx_handler, NULL, PSTR("fhtrx - start receiver"));
   cli_register_command(PSTR("tmp"), temp_handler, NULL, PSTR("tmp - read the temperatures"));
 
-    
+
   cli_register_command(PSTR("mem"), mem_handler, NULL, PSTR("mem - get free memory info"));
 
 
   /* initial sync if radio available and at least one group configured*/
   if (radioStatus >= 0 &&  fht_get_groups_num() > 0) {
     fht_cancel_panic();
-    
+
     LOG_CLI("Syncing all group valves...\n");
     fht_sync(grp_indx_all);
     LOG_CLI("Sync done.\n");
-    
+
     LOG_CLI("Setting all group valves to 0x%X...\n", FHT_SYNC_SET_VALUE);
-    fht_enqueue(grp_indx_all, 0, FHT_VALVE_SET, FHT_SYNC_SET_VALUE); 
-    
+    fht_enqueue(grp_indx_all, 0, FHT_VALVE_SET, FHT_SYNC_SET_VALUE);
+
     fht_cancel_panic();
   }
   return radioStatus;
@@ -333,10 +344,10 @@ int fhtloop() {
 
 
 /*
-int main(void)
-{
+  int main(void)
+  {
 	fhtsetup();
         temp_init();
 	fhtloop();
-}
+  }
 */
