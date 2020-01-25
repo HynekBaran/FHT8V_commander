@@ -76,13 +76,8 @@
 #define PORTB_INS			(MASK(B0) | MASK(TRX_MISO) | MASK(nTRX_IRQ))
 #define PORTC_INS			(0)
 
-#ifdef LED_TRX
 //HB #define PORTD_INS			(MASK(DEBUG_RXD) | MASK(D3))
 #define PORTD_INS			(MASK(DEBUG_RXD)) //HB
-#else
-//HB #define PORTD_INS			(MASK(DEBUG_RXD) | MASK(D3) | MASK(D5))
-#define PORTD_INS			(MASK(DEBUG_RXD)| MASK(D5)) //HB
-#endif
 
 #define PORTB_PULLUP		(MASK(TRX_MISO) | MASK(nTRX_IRQ))
 #define PORTC_PULLUP		(0)
@@ -101,29 +96,22 @@
 #define PORTC_OUTS			(MASK(C3) | MASK(I2C_SDA) | MASK(I2C_SCL))
 #endif
 // Gate D
-#ifdef LED_TRX
 //HB #define PORTD_OUTS			(MASK(DEBUG_TXD) | MASK(D6) | MASK(D7)))
-#define PORTD_OUTS			(MASK(DEBUG_TXD) | MASK(D3) | MASK(D6) | MASK(D7))) //HB
-#else
-//HB #define PORTD_OUTS			(MASK(DEBUG_TXD) | MASK(LED_TRX) | MASK(D6) | MASK(D7))) 
-#define PORTD_OUTS			(MASK(DEBUG_TXD) | MASK(LED_TRX) |  MASK(D3) | MASK(D6) | MASK(D7))) //HB 
-
-#endif
+#define PORTD_OUTS      (MASK(DEBUG_TXD) | MASK(D7))) //HB
 
 // Gate B
 #define PORTB_INITIAL		(MASK(nTRX_SEL))
+
 // Gate C
 #ifdef TRX_SDN
 #define PORTC_INITIAL		(MASK(TRX_SDN) | MASK(C3) | MASK(I2C_SDA) | MASK(I2C_SCL))
 #else
 #define PORTC_INITIAL		(MASK(C3) | MASK(I2C_SDA) | MASK(I2C_SCL))
 #endif
+
 // Gate D
-#ifdef LED_TRX
-#define PORTD_INITIAL		(MASK(LED_TRX) | MASK(DEBUG_TXD) ) //
-#else
-#define PORTD_INITIAL		(MASK(DEBUG_TXD))
-#endif
+//HB #define PORTD_INITIAL		(MASK(LED_TRX) | MASK(DEBUG_TXD) ) //
+#define PORTD_INITIAL    (MASK(LED_TRX) | MASK(LED_GREEN) | MASK(LED_RED) | MASK(DEBUG_TXD) ) //HB
 
 
 /*
@@ -178,31 +166,18 @@
 #define TRX_ON()				{}
 #endif
 
-
-#ifdef LED_TRX
 #define LED_TRX_OFF()				CLEARP(LED_TRX)
 #define LED_TRX_ON()				SETP(LED_TRX)
-#else
-#define LED_TRX_OFF()				{}
-#define LED_TRX_ON()				{}
-#endif
 
 //HB:
-#ifdef LED_GREEN
+
 #define LED_GREEN_OFF()				CLEARP(LED_GREEN) 
 #define LED_GREEN_ON()				SETP(LED_GREEN)   
-#else
-#define LED_GREEN_OFF()				{} 
-#define LED_GREEN_ON()				{}   
-#endif
 
-#ifdef LED_RED
 #define LED_RED_OFF()				CLEARP(LED_RED) 
 #define LED_RED_ON()				SETP(LED_RED)   
 #else
-#define LED_RED_OFF()				{} 
-#define LED_RED_ON()				{}   
-#endif
+
 //:HB
 
 

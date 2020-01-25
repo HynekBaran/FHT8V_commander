@@ -158,7 +158,7 @@ static int fht_handler(cli_t *ctx, void *arg, int argc, char **argv)
     value = atoi(argv[3]);
     LOG_CLI("Setting group %u valve position to 0x%X\n", groupname, value);
     fht_enqueue(group, 0, FHT_VALVE_SET, value);
-    fht_do_not_panic();
+    fht_cancel_panic();
   } else if (strcmp_PF(argv[1], PSTR("offset")) == 0) {
     // *** OFFSET ***
     // not properly tested yet
@@ -193,7 +193,7 @@ static int fht_handler(cli_t *ctx, void *arg, int argc, char **argv)
     fht_print();
   }  else if (strcmp_PF(argv[1], PSTR("idle")) == 0) {
     // *** IDLE ***
-    fht_do_not_panic();
+    fht_cancel_panic();
     LOG_CLI("IDLE.\n")
   } else  {
     LOG_CLI("Unknown fht command.\n");
@@ -314,7 +314,7 @@ int fhtsetup(void)
 
   /* initial sync if radio available and at least one group configured*/
   if (radioStatus >= 0 &&  fht_get_groups_num() > 0) {
-    fht_do_not_panic();
+    fht_cancel_panic();
     
     LOG_CLI("Syncing all group valves...\n");
     fht_sync(grp_indx_all);
@@ -323,7 +323,7 @@ int fhtsetup(void)
     LOG_CLI("Setting all group valves to 0x%X...\n", FHT_SYNC_SET_VALUE);
     fht_enqueue(grp_indx_all, 0, FHT_VALVE_SET, FHT_SYNC_SET_VALUE); 
     
-    fht_do_not_panic();
+    fht_cancel_panic();
   }
   return radioStatus;
 }

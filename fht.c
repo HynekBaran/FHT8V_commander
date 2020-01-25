@@ -401,7 +401,9 @@ void fht_print(void) {
 
   PRINTF("\n*** Technical report:\n");
   PRINTF("Free mem is %u\n", freeMemory());
+  if (fht_is_panic()) PRINTF("Panic!\n");
   PRINTF("Uptime in ticks: %u; last enq command at: %u\n", g_ticks, g_last_command_enqueued_time);
+  if (g_freezingMode>0) PRINTF("Freezing!\n");
   PRINTF("Last known temp: %d/10, freezing mode: %u\n", temp_get_last_known_t10(), g_freezingMode);
   // unsigned log upt = millis()/1000;
   // print_uptime(upt);
@@ -428,34 +430,47 @@ void fht_config_save_group(grp_indx_t group)
 }
 
 /* clear panic counter */
-void fht_do_not_panic(void) {
+void fht_clear_panic_count(void) {
   g_last_command_enqueued_time = g_ticks;
+}
+
+/* cancel panic (if any) and clear panic counter*/
+void fht_cancel_panic(void) {
+  if (fht_is_panic()) {
+    LOG_FHT("0 PANIC OFF tick='%u' last_enq='%u' pos='%u'\n", g_ticks, g_last_command_enqueued_time, FHT_PANIC_SET_VALUE);
+    LOG_CLI("PANIC OFF");
+  }
+  fht_clear_panic_count();
   LED_RED_OFF();
+}
+
+bool_t fht_is_panic(void) {
+  return g_ticks  >=  g_last_command_enqueued_time + FHT_PANIC_TIMEOUT ;
 }
 
 /* Called once every 500 ms from ISR */
 void fht_tick(void) // HB
 {
-  if (g_ticks  >=  g_last_command_enqueued_time + FHT_PANIC_TIMEOUT) { // panic?
-    LOG_FHT("0 PANIC tick='%u' last_enq='%u' pos='%u'\n", g_ticks, g_last_command_enqueued_time, FHT_PANIC_SET_VALUE);
-    LOG_CLI("PANIC setting all groups valve positions to 0x%X : message enqueued.\n", FHT_PANIC_SET_VALUE);
+  LED_GREEN_ON();
+  if (fht_is_panic()) { // panic?
+    LOG_FHT("0 PANIC ON tick='%u' last_enq='%u' pos='%u'\n", g_ticks, g_last_command_enqueued_time, FHT_PANIC_SET_VALUE);
+    LOG_CLI("PANIC ON setting all groups valve positions to 0x%X : message enqueued.\n", FHT_PANIC_SET_VALUE);
     fht_enqueue(grp_indx_all, 0, FHT_VALVE_SET, FHT_PANIC_SET_VALUE);
-    fht_do_not_panic();
+    fht_clear_panic_count();
     LED_RED_ON();
   }
 
   if (si443x_status() == 0) {
     grp_indx_t group;
-    LED_GREEN_ON();
     for (group = 0; group < g_groups_num; group++) {
       fht_tick_grp(group);
     }
-    LED_GREEN_OFF();
     g_ticks++;
   } else {
+    LED_RED_ON();
     LOG_CLI("fht_tick ignored,  radio not intialized.\n");
   }
-
+  LED_GREEN_OFF();
 }
 
 void fht_tick_grp(grp_indx_t group)
@@ -511,6 +526,7 @@ void fht_tick_grp(grp_indx_t group)
         if (lastT10 <= ((int16_t)(10 * FHT_FREEZING_TEMP))) { // is freezing
           if (g_freezingMode == 0) LOG_FHT("0 FREEZING ENTER lastT10='%d' tick='%u'\n", lastT10, g_ticks);
           g_freezingMode = FREEZING_INIT_COUNT;
+          LED_RED_ON();
         }
         else { // not freezing
           if (g_freezingMode == 1) LOG_FHT("0 FREEZING LEAVE lastT10='%d tick='%u''\n", lastT10, g_ticks);
