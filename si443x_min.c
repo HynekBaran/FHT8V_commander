@@ -483,7 +483,7 @@ int si443x_receive(uint8_t *data, uint8_t data_length, int timeout, int *rssi)
 	SI443X_MODE_STANDBY();
 
 	/* Read the requested number of bytes from the FIFO */
-	DPRINTF("receiving %hu bytes\n", data_length);
+	DPRINTF("receiving 0x%X bytes\n", data_length);
 
 	/* Read from FIFO */
 	SELECT();
@@ -513,7 +513,7 @@ int si443x_transmit(uint8_t *data, uint8_t data_length)
 	si443x_standby();
 
 	/* Push data to FIFO */
-	//DPRINTF("Writing %hu bytes to tx FIFO\n", data_length);
+	//DPRINTF("Writing 0x%X bytes to tx FIFO\n", data_length);
 	SELECT();
 	si443x_io(R_FIFO | WRITE);
 	while (data_length--) {

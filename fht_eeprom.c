@@ -156,7 +156,7 @@ void fht_eeprom_print(void) {
                       (void*) header_cfg.header_size + g*header_cfg.group_size, 
                       header_cfg.group_size);
     
-    LOG_FHT("1 EEPROM Group='%u' hc='%u %u'='%hu %hu'\n", grp_indx2name(g), grp_cfg.hc1, grp_cfg.hc2,  grp_cfg.hc1, grp_cfg.hc2);
+    LOG_FHT("1 EEPROM Group='%u' hc='%u %u'='0x%X 0x%X'\n", grp_indx2name(g), grp_cfg.hc1, grp_cfg.hc2,  grp_cfg.hc1, grp_cfg.hc2);
   }
   
   return header_cfg.groups;

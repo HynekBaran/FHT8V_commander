@@ -99,7 +99,7 @@ static void cmddump(fht_msg_t *msg)
       printf_P(PSTR("TEST"));
       break;
     default:
-      printf_P(PSTR("cmd 0x%hu ext 0x%hu"), msg->command & 0xf, msg->extension);
+      printf_P(PSTR("cmd 0x0x%X ext 0x0x%X"), msg->command & 0xf, msg->extension);
   }
 }
 
@@ -128,7 +128,7 @@ static void msgdump(fht_msg_t *msg)
   }
 
   printf_P(PSTR("Received message:\n"));
-  printf_P(PSTR("HC1 = %hu, HC2 = %hu, ADDR = %hu\n"), msg->hc1, msg->hc2, msg->address);
+  printf_P(PSTR("HC1 = 0x%X, HC2 = 0x%X, ADDR = 0x%X\n"), msg->hc1, msg->hc2, msg->address);
   printf_P(PSTR("\n"));
 
   printf_P(PSTR("COMMAND: "));
@@ -355,7 +355,7 @@ void fht_init(void)
       PRINTF("Config loaded from eeprom, %d groups found.\n", r);
       g_groups_num = r;
       for (g = 0; g < r; g++)
-        LOG_FHT("1 EEPROM Group %d HC is %d %d = %hu %hu.\n", grp_indx2name(g),  g_message[g].hc1, g_message[g].hc2,  g_message[g].hc1, g_message[g].hc2);
+        LOG_FHT("1 EEPROM Group %d HC is %d %d = 0x%X 0x%X.\n", grp_indx2name(g),  g_message[g].hc1, g_message[g].hc2,  g_message[g].hc1, g_message[g].hc2);
     }
 }
 
@@ -378,7 +378,7 @@ void msg_enq_print(grp_indx_t group, int8_t verb)
   PRINTF("FLG='"); cmdflagsdump(&(g_message[group])); PRINTF("' ");
   PRINTF("grp='%d' adr='%u' ", grp_indx2name(group),  g_message[group].address);
   if (verb > 0) {
-    PRINTF(" hc='%u %u'='%hu %hu' cmdL='0x%hu' cmdU='0x%hu' ext='0x%hu' ",
+    PRINTF(" hc='%u %u'='0x%X 0x%X' cmdL='0x0x%X' cmdU='0x0x%X' ext='0x0x%X' ",
            g_message[group].hc1, g_message[group].hc2,
            g_message[group].hc1, g_message[group].hc2,
            g_message[group].command & 0xf, (g_message[group].command & 0xf0) >> 4, g_message[group].extension);

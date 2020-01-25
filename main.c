@@ -139,7 +139,7 @@ static int fht_handler(cli_t *ctx, void *arg, int argc, char **argv)
 
     fht_set_hc_grp(group, hc1, hc2);
     fht_config_save_group(group);
-    LOG_CLI("Home code of group %u was set to %u %uhc='%u %u'='%hu %hu'.\n", groupname, hc1, hc2, hc1, hc2);
+    LOG_CLI("Home code of group %u was set to %u %uhc='%u %u'='0x%X 0x%X'.\n", groupname, hc1, hc2, hc1, hc2);
 
   } else if (strcmp_PF(argv[1], PSTR("pair")) == 0) {
     // *** PAIR ***
