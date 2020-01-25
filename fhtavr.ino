@@ -10,8 +10,8 @@ extern "C" {
 }
 
 void setup() {
-  temp_init();
   fhtsetup();
+  temp_init();
 }
 
 void loop() {
