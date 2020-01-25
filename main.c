@@ -165,7 +165,7 @@ static int fht_handler(cli_t *ctx, void *arg, int argc, char **argv)
     // 'setp' takes one argument which is the valve position in the range 0 to 100 [decimal, %]
     if (strcmp_PF(argv[1], PSTR("set")) == 0) value = atoi(argv[3]); // dec
     else  if (strcmp_PF(argv[1], PSTR("seth")) == 0)   value = strtol(argv[3], 0, 16); // hex
-    else  value = atoi(argv[3]); // dec %
+    else  value = ((uint16_t) atoi(argv[3]))*100/255; // dec %
 
     LOG_CLI("Setting group %u valve position to 0x%X\n", groupname, value);
     fht_enqueue(group, 0, FHT_VALVE_SET, value);
