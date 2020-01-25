@@ -355,7 +355,7 @@ void fht_init(void)
       PRINTF("Config loaded from eeprom, %d groups found.\n", r);
       g_groups_num = r;
       for (g = 0; g < r; g++)
-        LOG_FHT("1 EEPROM Group %d HC is %d %d.\n", grp_indx2name(g),  g_message[g].hc1, g_message[g].hc2);
+        LOG_FHT("1 EEPROM Group %d HC is %d %d = %hu %hu.\n", grp_indx2name(g),  g_message[g].hc1, g_message[g].hc2,  g_message[g].hc1, g_message[g].hc2);
     }
 }
 
